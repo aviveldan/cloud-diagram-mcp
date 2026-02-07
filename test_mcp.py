@@ -1,44 +1,50 @@
-"""Test MCP server end-to-end using FastMCP client to debug hangs."""
+"""Test MCP server end-to-end using FastMCP in-memory Client."""
 import asyncio
 import json
 import time
-import sys
 
 from fastmcp import Client
-from fastmcp.client.transports import PythonStdioTransport
+from cloud_diff_mcp.server import mcp
 
 
 async def main():
-    plan = json.load(open("examples/sample-plan.json"))
+    for plan_file in ["examples/sample-plan.json", "examples/complex-aws-plan.json"]:
+        with open(plan_file) as f:
+            plan = json.load(f)
+        print(f"\n{'='*60}", flush=True)
+        print(f"Testing with {plan_file}", flush=True)
+        print(f"  Resources: {len(plan.get('resource_changes', []))}", flush=True)
 
-    transport = PythonStdioTransport(
-        "cloud_diff_mcp.server:mcp",
-        python_cmd=sys.executable,
-    )
+        async with Client(mcp) as client:
+            # 1. List tools
+            tools = await client.list_tools()
+            print(f"  Tools: {[t.name for t in tools]}", flush=True)
 
-    print("Connecting to server...", flush=True)
-    async with Client(transport) as client:
-        print("Connected! Listing tools...", flush=True)
-        tools = await client.list_tools()
-        print(f"Tools: {[t.name for t in tools]}", flush=True)
+            # 2. Call tool
+            print("  Calling visualize_tf_diff...", flush=True)
+            start = time.time()
+            try:
+                result = await asyncio.wait_for(
+                    client.call_tool(
+                        "visualize_tf_diff", {"plan": json.dumps(plan)}
+                    ),
+                    timeout=60,
+                )
+                elapsed = time.time() - start
+                print(f"  Result received in {elapsed:.1f}s", flush=True)
 
-        print("\nCalling visualize_tf_diff...", flush=True)
-        start = time.time()
-        try:
-            result = await asyncio.wait_for(
-                client.call_tool("visualize_tf_diff", {"plan": json.dumps(plan)}),
-                timeout=30,
-            )
-            elapsed = time.time() - start
-            print(f"Result received in {elapsed:.1f}s", flush=True)
-            for item in result:
-                print(f"  Content type: {item.type}, size: {len(str(item.text)) if hasattr(item, 'text') else 'N/A'}", flush=True)
-        except asyncio.TimeoutError:
-            elapsed = time.time() - start
-            print(f"TIMED OUT after {elapsed:.1f}s!", flush=True)
-        except Exception as e:
-            elapsed = time.time() - start
-            print(f"ERROR after {elapsed:.1f}s: {type(e).__name__}: {e}", flush=True)
+                for item in result.content:
+                    data = json.loads(item.text)
+                    has_svg = "_server_svg" in data
+                    print(f"  Has SVG: {has_svg}", flush=True)
+                    print(f"  Result size: {len(item.text) // 1024} KB", flush=True)
+
+            except asyncio.TimeoutError:
+                elapsed = time.time() - start
+                print(f"  TIMED OUT after {elapsed:.1f}s!", flush=True)
+            except Exception as e:
+                elapsed = time.time() - start
+                print(f"  ERROR after {elapsed:.1f}s: {type(e).__name__}: {e}", flush=True)
 
     print("\nDone", flush=True)
 

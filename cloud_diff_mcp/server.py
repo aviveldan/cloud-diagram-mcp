@@ -665,7 +665,7 @@ EMBEDDED_VIEW_HTML: str = """\
           function fitSvg() {
             const vb2 = svgNode.getAttribute('viewBox');
             if (!vb2) return;
-            const p = vb2.split(/[\s,]+/).map(Number);
+            const p = vb2.split(/[\\s,]+/).map(Number);
             const cr = vp.getBoundingClientRect();
             sc = Math.min(cr.width/p[2], cr.height/p[3]) * 0.92;
             px = (cr.width - p[2]*sc)/2;
@@ -698,7 +698,7 @@ EMBEDDED_VIEW_HTML: str = """\
           svgNode.querySelectorAll('.node').forEach(g => {
             let matched = null;
             g.querySelectorAll('text').forEach(t => {
-              const raw = t.textContent.trim().replace(/[\u2728\ud83d\uddd1\ufe0f\ud83d\udcdd\ud83d\udd04]/g, '').trim();
+              const raw = t.textContent.trim().replace(/^\\[[\\+\\-\\~\\*]\\]\\s*/, '').trim();
               if (!matched) {
                 for (const it of items) {
                   if (it.name === raw || it.address.includes(raw)) { matched = it; break; }
