@@ -26,18 +26,25 @@ from diagrams.gcp.storage import GCS
 from cloud_diff_mcp.visualizer import ICON_MAPPING, get_icon_class, get_primary_action
 
 
-def visualize_terraform_plan_hierarchical(plan_data: Dict[str, Any]) -> Tuple[str, str]:
+def visualize_terraform_plan_hierarchical(
+    plan_data: Dict[str, Any], 
+    format: str = "png",
+    show_connections: bool = True
+) -> Tuple[str, str]:
     """
     Generate a hierarchical visual diagram from Terraform plan data.
     Shows architecture organized by layers and includes unchanged resources for context.
     
     Args:
         plan_data: Parsed Terraform plan JSON
+        format: Output format - "png" or "svg" (default: "png")
+        show_connections: Whether to show dependencies between resources (default: True)
     
     Returns:
         Tuple of (output_file_path, summary_text)
     """
     resource_changes = plan_data.get("resource_changes", [])
+    configuration = plan_data.get("configuration", {})
     
     # Categorize resources by type and action
     resources_by_layer = {
@@ -138,7 +145,7 @@ def visualize_terraform_plan_hierarchical(plan_data: Dict[str, Any]) -> Tuple[st
         show=False,
         direction="TB",
         graph_attr=graph_attr,
-        outformat="png",
+        outformat=format,
     ):
         # Layer 1: DNS & CDN (Internet-facing)
         if resources_by_layer["dns"] or resources_by_layer["cdn"]:
@@ -295,6 +302,22 @@ def visualize_terraform_plan_hierarchical(plan_data: Dict[str, Any]) -> Tuple[st
                     icon_class = get_icon_class(res["type"])
                     label = get_resource_label(res, action)
                     node_objects[res["address"]] = icon_class(label)
+        
+        # Add connections based on dependencies
+        if show_connections:
+            root_module = configuration.get("root_module", {})
+            resources_config = root_module.get("resources", [])
+            
+            for resource_config in resources_config:
+                address = resource_config.get("address")
+                depends_on = resource_config.get("depends_on", [])
+                
+                # Only create edges if both nodes exist in our diagram
+                if address in node_objects:
+                    for dependency in depends_on:
+                        if dependency in node_objects:
+                            # Create edge from dependency to dependent resource
+                            node_objects[dependency] >> Edge(color="gray", style="dashed") >> node_objects[address]
     
     # Generate summary
     summary_lines = []
@@ -306,7 +329,8 @@ def visualize_terraform_plan_hierarchical(plan_data: Dict[str, Any]) -> Tuple[st
     
     summary = "\n".join(summary_lines)
     
-    return f"{output_file}.png", summary
+    output_ext = format if format in ["png", "svg"] else "png"
+    return f"{output_file}.{output_ext}", summary
 
 
 def get_resource_label(resource: Dict[str, Any], action: str) -> str:
@@ -328,3 +352,32 @@ def get_resource_label(resource: Dict[str, Any], action: str) -> str:
         return f"{name}"
     else:
         return f"{action_emoji} {name}"
+
+
+def get_change_summary(resource: Dict[str, Any], action: str) -> str:
+    """Generate a summary of what changed in a resource for tooltips/metadata."""
+    change = resource.get("change", {})
+    
+    if action == "create":
+        return f"Creating new {resource['type']}: {resource['name']}"
+    elif action == "delete":
+        return f"Deleting {resource['type']}: {resource['name']}"
+    elif action == "replace":
+        return f"Replacing {resource['type']}: {resource['name']}"
+    elif action == "update":
+        # Try to identify what changed
+        before = change.get("before", {})
+        after = change.get("after", {})
+        
+        if isinstance(before, dict) and isinstance(after, dict):
+            changed_keys = []
+            for key in set(list(before.keys()) + list(after.keys())):
+                if before.get(key) != after.get(key):
+                    changed_keys.append(key)
+            
+            if changed_keys:
+                return f"Updating {resource['type']}: {resource['name']} (changes: {', '.join(changed_keys[:3])})"
+        
+        return f"Updating {resource['type']}: {resource['name']}"
+    
+    return f"{resource['type']}: {resource['name']}"
