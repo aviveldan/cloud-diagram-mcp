@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from cloud_diff_mcp.svg_embedder import embed_icons_in_svg
+
 
 def generate_interactive_html(
     plan_data: Dict[str, Any],
@@ -24,6 +26,10 @@ def generate_interactive_html(
     Returns:
         Path to the generated HTML file
     """
+    # First, embed the icons in the SVG as base64 data URIs
+    print("   🖼️  Embedding cloud provider icons in SVG...")
+    embed_icons_in_svg(svg_path)
+    
     resource_changes = plan_data.get("resource_changes", [])
     
     # Build resource lookup
