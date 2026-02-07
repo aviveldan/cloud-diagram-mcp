@@ -7,15 +7,22 @@ A Model Context Protocol (MCP) server for analyzing Terraform plans and visualiz
 - 🎨 **Offline Visual Diffing**: Generate beautiful cloud architecture diagrams from Terraform plan JSON
 - 🔒 **No Cloud Credentials Required**: Operates entirely offline, processing plan output locally
 - ☁️ **Multi-Cloud Support**: Icons for AWS, Azure, and GCP resources
+- 🏗️ **Hierarchical Architecture Views**: Complex infrastructures organized by architectural layers
 - 🎯 **Visual State Representation**:
   - 🟢 **Green**: New resources (create)
   - 🔴 **Red**: Deleted resources (delete)
   - 🟠 **Orange**: Modified resources (update)
   - 🟣 **Purple**: Replaced resources (create + delete)
 
-## Screenshot
+## Screenshots
 
-![Terraform Plan Visualization](https://github.com/user-attachments/assets/94718f75-fe45-4f20-875b-5012b4f11d76)
+### Simple Infrastructure Changes
+![AWS Simple Example](https://github.com/user-attachments/assets/b338b884-1ce6-4c86-b160-eab7ce3f5152)
+
+### Complex Multi-Tier Architecture
+![Complex AWS Architecture](https://github.com/user-attachments/assets/522ad236-d273-41f8-8007-c189093d7731)
+
+The complex example shows a production-grade multi-tier architecture with 15 resources organized across 7 layers: Internet (CDN, DNS), Network Infrastructure (VPC, Subnets, NAT Gateways), Load Balancing, Compute (Multi-AZ), Data Layer (RDS, ElastiCache), Storage (S3), and Security (IAM, Security Groups).
 
 ## Prerequisites
 
@@ -104,11 +111,30 @@ terraform show -json tfplan > plan.json
 
 The tool includes icon mappings for common resources across cloud providers:
 
-**AWS**: EC2, VPC, RDS, S3, ELB, Lambda, IAM, Security Groups, and more  
-**Azure**: Virtual Machines, Virtual Networks, SQL Database, Storage Accounts, and more  
+**AWS**: EC2, VPC, RDS, S3, ELB, Lambda, IAM, Security Groups, ElastiCache, Route53, CloudFront, NAT Gateway, and more  
+**Azure**: Virtual Machines, Virtual Networks, SQL Database, Storage Accounts, Managed Identities, and more  
 **GCP**: Compute Engine, VPC, Cloud SQL, Cloud Storage, GKE, and more
 
 Unknown resource types default to a generic compute icon.
+
+## Examples
+
+The repository includes three example Terraform plans:
+
+1. **simple-aws-plan.json**: 6 resource changes demonstrating basic AWS infrastructure
+2. **azure-plan.json**: 7 resource changes showing Azure resources
+3. **complex-aws-plan.json**: 15 resource changes in a multi-tier production architecture with:
+   - Multi-AZ deployment across 2 availability zones
+   - Load balancing with ALB
+   - Database with multi-AZ failover
+   - Caching layer with ElastiCache
+   - CDN with CloudFront
+   - DNS with Route53
+
+Generate diagrams for all examples:
+```bash
+python3 generate_examples.py
+```
 
 ## Development
 
@@ -118,9 +144,17 @@ Unknown resource types default to a generic compute icon.
 cloud-diff-mcp/
 ├── cloud_diff_mcp/
 │   ├── __init__.py
-│   ├── server.py          # FastMCP server implementation
-│   └── visualizer.py      # Diagram generation logic
+│   ├── server.py                    # FastMCP server implementation
+│   ├── visualizer.py                # Standard diagram generation
+│   └── visualizer_hierarchical.py  # Hierarchical layout for complex architectures
 ├── examples/
+│   ├── sample-plan.json             # Simple AWS example
+│   ├── azure-plan.json              # Azure example
+│   └── complex-aws-plan.json        # Complex multi-tier architecture
+├── requirements.txt                 # Python dependencies
+├── pyproject.toml                   # Project metadata
+└── README.md
+```
 │   └── sample-plan.json   # Sample Terraform plan
 ├── requirements.txt       # Python dependencies
 ├── pyproject.toml         # Project metadata
