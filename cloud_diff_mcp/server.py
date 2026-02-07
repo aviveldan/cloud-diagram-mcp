@@ -981,15 +981,14 @@ def visualize_tf_diff(plan: str) -> str:
         svg = generate_svg(plan_data)
         svg = embed_icons_in_svg_content(svg)
         # Remove surrogate characters that break UTF-8 JSON serialisation
-        svg = svg.encode("utf-8", errors="surrogatepass").decode("utf-8", errors="replace")
+        # Use 'ignore' to strip surrogates completely
+        svg = svg.encode("utf-8", errors="ignore").decode("utf-8")
         plan_data["_server_svg"] = svg
     except Exception:
         pass  # Fall back to client-side icon rendering
 
+    # Use ensure_ascii=True to prevent any Unicode issues in JSON
     result = json.dumps(plan_data, ensure_ascii=True)
-    # Belt-and-suspenders: strip any surviving surrogate code points that
-    # would cause PydanticSerializationError in the MCP stdio transport.
-    result = result.encode("utf-8", errors="surrogatepass").decode("utf-8", errors="replace")
     return result
 
 

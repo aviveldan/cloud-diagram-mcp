@@ -403,7 +403,8 @@ def generate_svg(plan_data: Dict[str, Any]) -> str:
     with open(svg_path, 'rb') as f:
         raw = f.read()
     # Graphviz on Windows can emit invalid UTF-8; decode leniently
-    return raw.decode('utf-8', errors='replace')
+    # Use 'ignore' to strip any invalid surrogates completely
+    return raw.decode('utf-8', errors='ignore')
 
 
 def get_resource_label(resource: Dict[str, Any], action: str) -> str:
@@ -411,17 +412,17 @@ def get_resource_label(resource: Dict[str, Any], action: str) -> str:
     name = resource["name"]
     resource_type = resource["type"].split("_", 1)[1] if "_" in resource["type"] else resource["type"]
     
-    # Action emoji
-    action_emoji = {
-        "create": "✨",
-        "delete": "🗑️",
-        "update": "📝",
-        "replace": "🔄",
+    # Action symbols (using simple ASCII-compatible symbols to avoid surrogate pair issues)
+    action_symbol = {
+        "create": "+",
+        "delete": "-",
+        "update": "~",
+        "replace": "*",
         "no-op": "",
     }.get(action, "")
     
     if action == "no-op":
-        # Unchanged resources shown without emoji
+        # Unchanged resources shown without symbol
         return f"{name}"
     else:
-        return f"{action_emoji} {name}"
+        return f"[{action_symbol}] {name}"
