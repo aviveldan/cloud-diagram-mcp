@@ -1,11 +1,5 @@
-node_modules/
-dist/
-*.log
-.env
-.DS_Store
-*.tsbuildinfo
-*.pyc
 __pycache__/
+*.pyc
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -13,3 +7,5 @@ terraform-diffs/
 venv/
 env/
 examples/diagrams/
+.env
+.DS_Store

@@ -1,11 +1,11 @@
 """
-Enhanced Terraform Plan Visualizer
+Terraform Plan Visualizer
 Generates hierarchical cloud architecture diagrams showing infrastructure evolution.
 """
 
-import os
+import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Set
+from typing import Any, Dict, List, Tuple
 
 from diagrams import Cluster, Diagram, Edge
 from diagrams.aws.compute import EC2
@@ -23,25 +23,93 @@ from diagrams.gcp.database import SQL, Firestore
 from diagrams.gcp.network import VPC as GcpVPC, LoadBalancing
 from diagrams.gcp.storage import GCS
 
-from cloud_diff_mcp.visualizer import ICON_MAPPING, get_icon_class, get_primary_action
+
+# Icon mapping for Terraform resource types to Diagrams classes
+ICON_MAPPING = {
+    # AWS Resources
+    "aws_instance": EC2,
+    "aws_vpc": VPC,
+    "aws_subnet": VPC,
+    "aws_security_group": IAM,
+    "aws_db_instance": RDS,
+    "aws_rds_cluster": RDS,
+    "aws_elasticache_cluster": ElastiCache,
+    "aws_elasticache_replication_group": ElastiCache,
+    "aws_s3_bucket": S3,
+    "aws_ebs_volume": EBS,
+    "aws_efs_file_system": EFS,
+    "aws_elb": ELB,
+    "aws_lb": ELB,
+    "aws_alb": ELB,
+    "aws_internet_gateway": InternetGateway,
+    "aws_nat_gateway": NATGateway,
+    "aws_route53_zone": Route53,
+    "aws_route53_record": Route53,
+    "aws_cloudfront_distribution": CloudFront,
+    "aws_iam_role": IAM,
+    "aws_iam_user": IAM,
+    "aws_iam_policy": IAM,
+    "aws_secretsmanager_secret": SecretsManager,
+    "aws_wafv2_web_acl": WAF,
+    # Azure Resources
+    "azurerm_virtual_machine": VM,
+    "azurerm_linux_virtual_machine": VM,
+    "azurerm_windows_virtual_machine": VM,
+    "azurerm_virtual_network": VirtualNetworks,
+    "azurerm_subnet": VirtualNetworks,
+    "azurerm_network_security_group": VirtualNetworks,
+    "azurerm_mssql_server": SQLDatabases,
+    "azurerm_mssql_database": SQLDatabases,
+    "azurerm_cosmosdb_account": CosmosDb,
+    "azurerm_storage_account": StorageAccounts,
+    "azurerm_storage_blob": BlobStorage,
+    "azurerm_storage_container": BlobStorage,
+    "azurerm_lb": LoadBalancers,
+    "azurerm_application_gateway": ApplicationGateway,
+    "azurerm_dns_zone": DNSZones,
+    "azurerm_user_assigned_identity": ManagedIdentities,
+    "azurerm_container_group": ContainerInstances,
+    "azurerm_app_service": AppServices,
+    # GCP Resources
+    "google_compute_instance": ComputeEngine,
+    "google_compute_network": GcpVPC,
+    "google_compute_subnetwork": GcpVPC,
+    "google_sql_database_instance": SQL,
+    "google_firestore_database": Firestore,
+    "google_storage_bucket": GCS,
+    "google_compute_forwarding_rule": LoadBalancing,
+    "google_container_cluster": GKE,
+    "google_app_engine_application": AppEngine,
+}
 
 
-def visualize_terraform_plan_hierarchical(
-    plan_data: Dict[str, Any], 
-    format: str = "png",
-    show_connections: bool = True
-) -> Tuple[str, str]:
+def get_icon_class(resource_type: str) -> Any:
+    """Get the Diagrams icon class for a Terraform resource type."""
+    return ICON_MAPPING.get(resource_type, EC2)
+
+
+def get_primary_action(actions: List[str]) -> str:
+    """Determine the primary action from a list of Terraform actions."""
+    if "create" in actions and "delete" in actions:
+        return "replace"
+    if "delete" in actions:
+        return "delete"
+    if "create" in actions:
+        return "create"
+    if "update" in actions:
+        return "update"
+    return "no-op"
+
+
+def generate_svg(plan_data: Dict[str, Any]) -> str:
     """
-    Generate a hierarchical visual diagram from Terraform plan data.
-    Shows architecture organized by layers and includes unchanged resources for context.
+    Generate an SVG diagram from Terraform plan data.
     
     Args:
         plan_data: Parsed Terraform plan JSON
-        format: Output format - "png" or "svg" (default: "png")
-        show_connections: Whether to show dependencies between resources (default: True)
     
     Returns:
-        Tuple of (output_file_path, summary_text)
+        SVG content as a string
     """
     resource_changes = plan_data.get("resource_changes", [])
     configuration = plan_data.get("configuration", {})
@@ -123,29 +191,43 @@ def visualize_terraform_plan_hierarchical(
             "action": action,
         })
     
-    # Create the diagram
-    output_dir = Path.cwd() / "terraform-diffs"
-    output_dir.mkdir(exist_ok=True)
-    output_file = output_dir / "terraform_plan_diff_complex"
+    # Create the diagram in a temp directory
+    tmp_dir = tempfile.mkdtemp()
+    output_file = Path(tmp_dir) / "terraform_plan"
     
     # Set diagram attributes for hierarchical layout
     graph_attr = {
-        "fontsize": "16",
+        "fontsize": "14",
         "bgcolor": "white",
-        "pad": "0.5",
+        "pad": "0.8",
         "rankdir": "TB",
-        "splines": "ortho",
+        "splines": "spline",
+        "nodesep": "0.8",
+        "ranksep": "1.0",
     }
-    
+
+    node_attr = {
+        "width": "1.5",
+        "height": "1.8",
+        "fixedsize": "true",
+        "fontsize": "11",
+    }
+
+    edge_attr = {
+        "minlen": "2",
+    }
+
     node_objects = {}  # Store node objects for creating edges
-    
+
     with Diagram(
         "Terraform Plan - Complex Architecture",
         filename=str(output_file),
         show=False,
         direction="TB",
         graph_attr=graph_attr,
-        outformat=format,
+        node_attr=node_attr,
+        edge_attr=edge_attr,
+        outformat="svg",
     ):
         # Layer 1: DNS & CDN (Internet-facing)
         if resources_by_layer["dns"] or resources_by_layer["cdn"]:
@@ -304,33 +386,24 @@ def visualize_terraform_plan_hierarchical(
                     node_objects[res["address"]] = icon_class(label)
         
         # Add connections based on dependencies
-        if show_connections:
-            root_module = configuration.get("root_module", {})
-            resources_config = root_module.get("resources", [])
+        root_module = configuration.get("root_module", {})
+        resources_config = root_module.get("resources", [])
+        
+        for resource_config in resources_config:
+            address = resource_config.get("address")
+            depends_on = resource_config.get("depends_on", [])
             
-            for resource_config in resources_config:
-                address = resource_config.get("address")
-                depends_on = resource_config.get("depends_on", [])
-                
-                # Only create edges if both nodes exist in our diagram
-                if address in node_objects:
-                    for dependency in depends_on:
-                        if dependency in node_objects:
-                            # Create edge from dependency to dependent resource
-                            node_objects[dependency] >> Edge(color="gray", style="dashed") >> node_objects[address]
+            if address in node_objects:
+                for dependency in depends_on:
+                    if dependency in node_objects:
+                        node_objects[dependency] >> Edge(color="gray", style="dashed") >> node_objects[address]
     
-    # Generate summary
-    summary_lines = []
-    summary_lines.append(f"- ✨ **Create**: {action_counts['create']} resources")
-    summary_lines.append(f"- 📝 **Update**: {action_counts['update']} resources")
-    summary_lines.append(f"- 🗑️ **Delete**: {action_counts['delete']} resources")
-    summary_lines.append(f"- 🔄 **Replace**: {action_counts['replace']} resources")
-    summary_lines.append(f"\n**Total changes**: {sum(action_counts.values())} resources")
-    
-    summary = "\n".join(summary_lines)
-    
-    output_ext = format if format in ["png", "svg"] else "png"
-    return f"{output_file}.{output_ext}", summary
+    # Read and return the generated SVG content
+    svg_path = f"{output_file}.svg"
+    with open(svg_path, 'rb') as f:
+        raw = f.read()
+    # Graphviz on Windows can emit invalid UTF-8; decode leniently
+    return raw.decode('utf-8', errors='replace')
 
 
 def get_resource_label(resource: Dict[str, Any], action: str) -> str:
@@ -352,32 +425,3 @@ def get_resource_label(resource: Dict[str, Any], action: str) -> str:
         return f"{name}"
     else:
         return f"{action_emoji} {name}"
-
-
-def get_change_summary(resource: Dict[str, Any], action: str) -> str:
-    """Generate a summary of what changed in a resource for tooltips/metadata."""
-    change = resource.get("change", {})
-    
-    if action == "create":
-        return f"Creating new {resource['type']}: {resource['name']}"
-    elif action == "delete":
-        return f"Deleting {resource['type']}: {resource['name']}"
-    elif action == "replace":
-        return f"Replacing {resource['type']}: {resource['name']}"
-    elif action == "update":
-        # Try to identify what changed
-        before = change.get("before", {})
-        after = change.get("after", {})
-        
-        if isinstance(before, dict) and isinstance(after, dict):
-            changed_keys = []
-            for key in set(list(before.keys()) + list(after.keys())):
-                if before.get(key) != after.get(key):
-                    changed_keys.append(key)
-            
-            if changed_keys:
-                return f"Updating {resource['type']}: {resource['name']} (changes: {', '.join(changed_keys[:3])})"
-        
-        return f"Updating {resource['type']}: {resource['name']}"
-    
-    return f"{resource['type']}: {resource['name']}"
