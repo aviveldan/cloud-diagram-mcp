@@ -154,11 +154,6 @@ python3 test_mcp_server.py
 python3 generate_interactive.py
 ```
 
-**Generate interactive visualization:**
-```bash
-python3 generate_interactive.py
-```
-
 Outputs:
 - PNG with dependency arrows and cloud icons (265KB)
 - SVG with embedded icons (self-contained)
@@ -168,13 +163,6 @@ Outputs:
 ```bash
 open terraform-diffs/terraform_plan_interactive.html
 ```
-
-The interactive visualization creates:
-- **PNG with connections**: Static diagram showing dependency arrows
-- **SVG diagram**: Scalable vector format with embedded icons
-- **Interactive HTML**: Click any resource to see its configuration and changes
-
-Open `terraform-diffs/terraform_plan_interactive.html` in a web browser to explore resources interactively.
 
 ## Tools
 
