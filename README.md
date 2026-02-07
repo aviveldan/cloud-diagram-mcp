@@ -8,6 +8,8 @@ A Model Context Protocol (MCP) server for analyzing Terraform plans and visualiz
 - 🔒 **No Cloud Credentials Required**: Operates entirely offline, processing plan output locally
 - ☁️ **Multi-Cloud Support**: Icons for AWS, Azure, and GCP resources
 - 🏗️ **Hierarchical Architecture Views**: Complex infrastructures organized by architectural layers
+- 🔗 **Dependency Connections**: Visual arrows showing relationships between resources
+- 🖱️ **Interactive HTML**: Clickable resources with configuration details
 - 🎯 **Visual State Representation**:
   - 🟢 **Green**: New resources (create)
   - 🔴 **Red**: Deleted resources (delete)
@@ -19,10 +21,13 @@ A Model Context Protocol (MCP) server for analyzing Terraform plans and visualiz
 ### Simple Infrastructure Changes
 ![AWS Simple Example](https://github.com/user-attachments/assets/b338b884-1ce6-4c86-b160-eab7ce3f5152)
 
-### Complex Multi-Tier Architecture
-![Complex AWS Architecture](https://github.com/user-attachments/assets/522ad236-d273-41f8-8007-c189093d7731)
+### Complex Multi-Tier Architecture with Connections
+![Complex AWS Architecture with Connections](https://github.com/user-attachments/assets/e63ee02d-7a6f-49d3-854c-8d6b05bd88e0)
 
-The complex example shows a production-grade multi-tier architecture with 15 resources organized across 7 layers: Internet (CDN, DNS), Network Infrastructure (VPC, Subnets, NAT Gateways), Load Balancing, Compute (Multi-AZ), Data Layer (RDS, ElastiCache), Storage (S3), and Security (IAM, Security Groups).
+The complex example shows a production-grade multi-tier architecture with 15 resources organized across 7 layers: Internet (CDN, DNS), Network Infrastructure (VPC, Subnets, NAT Gateways), Load Balancing, Compute (Multi-AZ), Data Layer (RDS, ElastiCache), Storage (S3), and Security (IAM, Security Groups). **Gray dashed arrows** show dependency relationships between resources (e.g., instances depend on subnets, subnets depend on VPC).
+
+### Interactive Visualization
+The tool also generates an interactive HTML page where you can **click on any resource** to view its full configuration and what changed. Perfect for understanding complex infrastructure changes in detail.
 
 ## Prerequisites
 
@@ -81,7 +86,17 @@ python3 test_visualization.py
 
 # Run the MCP server test
 python3 test_mcp_server.py
+
+# Generate interactive visualization with connections
+python3 generate_interactive.py
 ```
+
+The interactive visualization creates:
+- **PNG with connections**: Static diagram showing dependency arrows
+- **SVG diagram**: Scalable vector format
+- **Interactive HTML**: Click any resource to see its configuration and changes
+
+Open `terraform-diffs/terraform_plan_interactive.html` in a web browser to explore resources interactively.
 
 ## Tools
 
@@ -103,9 +118,23 @@ terraform show -json tfplan > plan.json
 ```
 
 **Output:**
-- High-quality PNG diagram saved to `terraform-diffs/terraform_plan_diff.png`
+- High-quality PNG/SVG diagram saved to `terraform-diffs/terraform_plan_diff.png`
 - Summary of changes with counts by action type
 - Visual grouping by action (create/delete/update/replace)
+
+**New Features:**
+- **Dependency Connections**: Gray dashed arrows show relationships between resources (enabled by default in hierarchical view)
+- **Interactive HTML**: Click resources to view configuration and changes (`generate_interactive.py`)
+- **SVG Output**: Use `format='svg'` for scalable vector graphics with embedded metadata
+
+### Interactive Features
+
+The interactive HTML visualization provides:
+- **Clickable Resources**: Click any resource icon to view details
+- **Configuration Viewer**: See before/after values for updates
+- **Change Highlighting**: Color-coded changes (green for additions, red for deletions)
+- **Resource Metadata**: Full Terraform resource type and action information
+- **Browser-Based**: No special tools required, just open in any modern browser
 
 ### Supported Resource Types
 
