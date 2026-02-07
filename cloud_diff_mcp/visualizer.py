@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 
 from diagrams import Cluster, Diagram, Edge
 from diagrams.aws.compute import EC2
-from diagrams.aws.database import RDS
+from diagrams.aws.database import RDS, ElastiCache
 from diagrams.aws.network import VPC, ELB, InternetGateway, NATGateway, Route53, CloudFront
 from diagrams.aws.security import IAM, SecretsManager, WAF
 from diagrams.aws.storage import S3, EBS, EFS
@@ -33,6 +33,8 @@ ICON_MAPPING = {
     "aws_security_group": IAM,
     "aws_db_instance": RDS,
     "aws_rds_cluster": RDS,
+    "aws_elasticache_cluster": ElastiCache,
+    "aws_elasticache_replication_group": ElastiCache,
     "aws_s3_bucket": S3,
     "aws_ebs_volume": EBS,
     "aws_efs_file_system": EFS,
