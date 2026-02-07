@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Cloud Diff MCP Server
+Cloud Diagram MCP Server
 FastMCP server that visualizes Terraform plan changes as an interactive MCP App.
 
 Uses the MCP Apps pattern:
@@ -17,9 +17,9 @@ from typing import Any
 from fastmcp import FastMCP
 from fastmcp.server.apps import ResourceCSP, ResourceUI, ToolUI
 
-mcp = FastMCP("cloud-diff-mcp")
+mcp = FastMCP("cloud-diagram-mcp")
 
-VIEW_URI = "ui://cloud-diff/visualization"
+VIEW_URI = "ui://cloud-diagram/visualization"
 
 
 # ---------------------------------------------------------------------------
@@ -193,7 +193,7 @@ EMBEDDED_VIEW_HTML: str = """\
     import { App } from "https://unpkg.com/@modelcontextprotocol/ext-apps@0.4.0/app-with-deps";
 
     const root = document.getElementById('app-root');
-    const app  = new App({ name: "Cloud Diff", version: "3.0.0" });
+    const app  = new App({ name: "Cloud Diagram", version: "3.0.0" });
 
     /* ================================================================
        Official-style Cloud Provider SVG Icons
@@ -976,8 +976,8 @@ def visualize_tf_diff(plan: str) -> str:
 
     # Try to generate SVG server-side with official cloud provider icons
     try:
-        from cloud_diff_mcp.visualizer_hierarchical import generate_svg
-        from cloud_diff_mcp.svg_embedder import embed_icons_in_svg_content
+        from cloud_diagram_mcp.visualizer_hierarchical import generate_svg
+        from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
         svg = generate_svg(plan_data)
         svg = embed_icons_in_svg_content(svg)
         # Remove surrogate characters that break UTF-8 JSON serialisation

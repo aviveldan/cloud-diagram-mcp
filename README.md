@@ -1,6 +1,6 @@
-# Cloud Diff MCP
+# Cloud Diagram MCP
 
-A Model Context Protocol (MCP) server for analyzing Terraform plans and visualizing infrastructure changes with high-fidelity cloud architecture diagrams using the Python Diagrams library.
+A Model Context Protocol (MCP) server for visualizing cloud infrastructure and Terraform plan changes with high-fidelity cloud architecture diagrams using the Python Diagrams library.
 
 ## Features
 
@@ -119,8 +119,8 @@ After installation, ensure the Graphviz `bin` directory (e.g. `C:\Program Files\
 
 ```bash
 # Clone the repository
-git clone https://github.com/aviveldan/cloud-diff-mcp.git
-cd cloud-diff-mcp
+git clone https://github.com/aviveldan/cloud-diagram-mcp.git
+cd cloud-diagram-mcp
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -135,10 +135,10 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 ```json
 {
   "mcpServers": {
-    "cloud-diff": {
+    "cloud-diagram": {
       "command": "python3",
-      "args": ["-m", "cloud_diff_mcp.server"],
-      "cwd": "/path/to/cloud-diff-mcp"
+      "args": ["-m", "cloud_diagram_mcp.server"],
+      "cwd": "/path/to/cloud-diagram-mcp"
     }
   }
 }
@@ -242,8 +242,8 @@ python3 generate_examples.py
 ### Project Structure
 
 ```
-cloud-diff-mcp/
-├── cloud_diff_mcp/
+cloud-diagram-mcp/
+├── cloud_diagram_mcp/
 │   ├── __init__.py
 │   ├── server.py                     # FastMCP server implementation
 │   ├── visualizer.py                 # Standard diagram generation
@@ -291,10 +291,10 @@ python3 test_mcp_server.py
 - Ensures no external file dependencies or broken image links
 
 **Technical Implementation:**
-1. `cloud_diff_mcp/server.py`: FastMCP server with `visualize_tf_diff` tool
-2. `cloud_diff_mcp/visualizer_hierarchical.py`: Hierarchical layout with dependency connections
-3. `cloud_diff_mcp/interactive_html.py`: Interactive HTML generator
-4. `cloud_diff_mcp/svg_embedder.py`: Icon embedding utility
+1. `cloud_diagram_mcp/server.py`: FastMCP server with `visualize_tf_diff` tool
+2. `cloud_diagram_mcp/visualizer_hierarchical.py`: Hierarchical layout with dependency connections
+3. `cloud_diagram_mcp/interactive_html.py`: Interactive HTML generator
+4. `cloud_diagram_mcp/svg_embedder.py`: Icon embedding utility
 
 ### Security & Privacy
 

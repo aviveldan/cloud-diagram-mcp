@@ -6,8 +6,8 @@ Orchestrates the full pipeline: SVG generation → icon embedding → HTML wrapp
 import json
 from typing import Any, Dict
 
-from cloud_diff_mcp.visualizer_hierarchical import generate_svg
-from cloud_diff_mcp.svg_embedder import embed_icons_in_svg_content
+from cloud_diagram_mcp.visualizer_hierarchical import generate_svg
+from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
 
 
 def generate_interactive_html(plan_data: Dict[str, Any]) -> str:

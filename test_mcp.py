@@ -4,7 +4,7 @@ import json
 import time
 
 from fastmcp import Client
-from cloud_diff_mcp.server import mcp
+from cloud_diagram_mcp.server import mcp
 
 
 async def main():
