@@ -3,9 +3,21 @@ Terraform Plan Visualizer
 Generates hierarchical cloud architecture diagrams showing infrastructure evolution.
 """
 
+import os
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+
+# Ensure Graphviz is on PATH for common installation locations
+_GRAPHVIZ_PATHS = [
+    r"C:\Program Files\Graphviz\bin",
+    r"C:\Program Files (x86)\Graphviz\bin",
+]
+if sys.platform == "win32":
+    for _gv_path in _GRAPHVIZ_PATHS:
+        if os.path.isdir(_gv_path) and _gv_path not in os.environ.get("PATH", ""):
+            os.environ["PATH"] = _gv_path + os.pathsep + os.environ.get("PATH", "")
 
 from diagrams import Cluster, Diagram, Edge
 from diagrams.aws.compute import EC2
