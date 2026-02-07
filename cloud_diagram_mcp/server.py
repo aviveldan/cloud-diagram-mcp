@@ -12,6 +12,8 @@ Uses the MCP Apps pattern:
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 from typing import Any
 
 from fastmcp import FastMCP
@@ -581,17 +583,33 @@ EMBEDDED_VIEW_HTML: str = """\
 
     /* ========== RENDER ========== */
     function render(planData) {
-      const changes = planData.resource_changes || [];
-      const depMap = (planData.configuration?.root_module?.resources || [])
-        .reduce((m, r) => { m[r.address] = r.depends_on || []; return m; }, {});
-      const counts = { create: 0, delete: 0, update: 0, replace: 0 };
-      const items = changes.map(r => {
-        const action = classify(r.change.actions);
-        if (counts[action] !== undefined) counts[action]++;
-        return { address: r.address, type: r.type, name: r.name,
-                 action, before: r.change.before, after: r.change.after,
-                 deps: depMap[r.address] || [] };
-      });
+      const isArchMode = planData._mode === 'architecture';
+      let items, counts, connections;
+
+      if (isArchMode) {
+        /* Architecture mode: resources + connections */
+        const resources = planData.resources || [];
+        connections = planData.connections || [];
+        counts = { create: 0, delete: 0, update: 0, replace: 0 };
+        items = resources.map(r => ({
+          address: r.address, type: r.type, name: r.name || r.address,
+          action: 'no-op', before: null, after: r.config || null, deps: []
+        }));
+      } else {
+        /* Diff mode: terraform plan */
+        const changes = planData.resource_changes || [];
+        const depMap = (planData.configuration?.root_module?.resources || [])
+          .reduce((m, r) => { m[r.address] = r.depends_on || []; return m; }, {});
+        counts = { create: 0, delete: 0, update: 0, replace: 0 };
+        connections = null;
+        items = changes.map(r => {
+          const action = classify(r.change.actions);
+          if (counts[action] !== undefined) counts[action]++;
+          return { address: r.address, type: r.type, name: r.name,
+                   action, before: r.change.before, after: r.change.after,
+                   deps: depMap[r.address] || [] };
+        });
+      }
 
       const serverSvg = planData._server_svg || null;
 
@@ -601,6 +619,11 @@ EMBEDDED_VIEW_HTML: str = """\
       if (counts.delete)  sp.push(`<span><span class="ldot delete"></span>${counts.delete} destroy</span>`);
       if (counts.replace) sp.push(`<span><span class="ldot replace"></span>${counts.replace} replace</span>`);
 
+      const diagTitle = isArchMode ? (planData.title || 'Cloud Architecture') : 'Cloud Architecture Diff';
+      const diagSub = isArchMode
+        ? `${items.length} resources`
+        : `Terraform &mdash; ${items.length} resources &mdash; v${planData.terraform_version||'?'}`;
+
       /* ---- Server SVG mode (official cloud icons via Graphviz) ---- */
       if (serverSvg) {
         root.className = '';
@@ -608,8 +631,8 @@ EMBEDDED_VIEW_HTML: str = """\
           <div class="header">
             <div class="header-logo">
               <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M2 15s2-4 5-4c1.5 0 2.5 1 3 2 .5-3 2-6 5-6s5 3 5 6-3 6-5 6H7c-3 0-5-2-5-4z"/></svg>
-              <div><h1>Cloud Architecture Diff</h1>
-              <p>Terraform &mdash; ${items.length} resources &mdash; v${planData.terraform_version||'?'}</p></div>
+              <div><h1>${diagTitle}</h1>
+              <p>${diagSub}</p></div>
             </div>
             <div class="summary-inline">${sp.join('')}</div>
           </div>
@@ -637,7 +660,12 @@ EMBEDDED_VIEW_HTML: str = """\
             <div class="legend-item"><div class="ldot update"></div>Update</div>
             <div class="legend-item"><div class="ldot delete"></div>Destroy</div>
             <div class="legend-item"><div class="ldot replace"></div>Replace</div>
-            <div class="legend-item" style="margin-left:auto;opacity:.5">Scroll to zoom &bull; Drag to pan</div>
+            <div class="legend-item" style="margin-left:auto;opacity:.5">
+              <span style="color:#4caf50">&#x2500;&#x2500;</span> new &nbsp;
+              <span style="color:#f44336">&#x2500;&#x2500;</span> removed &nbsp;
+              <span style="color:#888">- - -</span> unchanged &nbsp;&bull;&nbsp;
+              Scroll to zoom &bull; Drag to pan
+            </div>
           </div>`;
 
         /* Set up SVG zoom & pan */
@@ -756,8 +784,8 @@ EMBEDDED_VIEW_HTML: str = """\
         <div class="header">
           <div class="header-logo">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M2 15s2-4 5-4c1.5 0 2.5 1 3 2 .5-3 2-6 5-6s5 3 5 6-3 6-5 6H7c-3 0-5-2-5-4z"/></svg>
-            <div><h1>Cloud Architecture Diff</h1>
-            <p>Terraform &mdash; ${items.length} resources &mdash; v${planData.terraform_version||'?'}</p></div>
+            <div><h1>${diagTitle}</h1>
+            <p>${diagSub}</p></div>
           </div>
           <div class="summary-inline">${sp.join('')}</div>
         </div>
@@ -788,14 +816,18 @@ EMBEDDED_VIEW_HTML: str = """\
           <div class="legend-item"><div class="ldot update"></div>Update</div>
           <div class="legend-item"><div class="ldot delete"></div>Destroy</div>
           <div class="legend-item"><div class="ldot replace"></div>Replace</div>
-          <div class="legend-item" style="margin-left:auto;opacity:.5">&#8675; dashed = dependency</div>
+          <div class="legend-item" style="margin-left:auto;opacity:.5">
+            <span style="color:#4caf50">&#x2500;&#x2500;</span> new &nbsp;
+            <span style="color:#f44336">&#x2500;&#x2500;</span> removed &nbsp;
+            <span style="color:#888">- - -</span> unchanged
+          </div>
         </div>`;
 
       /* Draw connections after layout settles */
-      setTimeout(() => drawConnections(items), 80);
+      setTimeout(() => drawConnections(items, connections), 80);
       const canvasEl = document.getElementById('canvas');
-      canvasEl.addEventListener('scroll', () => drawConnections(items));
-      window.addEventListener('resize', () => drawConnections(items));
+      canvasEl.addEventListener('scroll', () => drawConnections(items, connections));
+      window.addEventListener('resize', () => drawConnections(items, connections));
 
       /* Click handling */
       const lookup = Object.fromEntries(items.map(i => [i.address, i]));
@@ -809,14 +841,20 @@ EMBEDDED_VIEW_HTML: str = """\
     }
 
     /* ========== CURVED DEPENDENCY CONNECTIONS ========== */
-    function drawConnections(items) {
+    const EDGE_COLORS = {
+      create: 'rgba(76,175,80,.7)',   /* green */
+      delete: 'rgba(244,67,54,.7)',   /* red */
+      'no-op': 'rgba(130,160,255,.4)' /* grey */
+    };
+    const EDGE_WIDTH = { create: '2.5', delete: '2.5', 'no-op': '1.5' };
+
+    function drawConnections(items, explicitConns) {
       const svg = document.getElementById('connSvg');
       const canvas = document.getElementById('canvas');
       const arch = document.getElementById('arch');
       if (!svg || !canvas || !arch) return;
 
       /* Size SVG to cover full scrollable area */
-      const archRect = arch.getBoundingClientRect();
       const canvasRect = canvas.getBoundingClientRect();
       const w = Math.max(arch.scrollWidth, canvas.scrollWidth);
       const h = Math.max(arch.scrollHeight, canvas.scrollHeight);
@@ -831,56 +869,72 @@ EMBEDDED_VIEW_HTML: str = """\
       const scrollL = canvas.scrollLeft;
       const scrollT = canvas.scrollTop;
 
-      items.forEach(item => {
-        (item.deps || []).forEach(dep => {
-          const fromEl = document.getElementById(cardId(dep));
-          const toEl   = document.getElementById(cardId(item.address));
-          if (!fromEl || !toEl) return;
+      /* Build list of edges to draw */
+      const edges = [];
+      const actionMap = Object.fromEntries(items.map(i => [i.address, i.action]));
 
-          const fr = fromEl.getBoundingClientRect();
-          const tr = toEl.getBoundingClientRect();
-
-          /* Convert to canvas-relative coords (accounting for scroll) */
-          const x1 = fr.left - canvasRect.left + scrollL + fr.width / 2;
-          const y1 = fr.top  - canvasRect.top  + scrollT + fr.height;
-          const x2 = tr.left - canvasRect.left + scrollL + tr.width / 2;
-          const y2 = tr.top  - canvasRect.top  + scrollT;
-
-          /* Choose best connection points */
-          let sx, sy, ex, ey;
-          const dx = Math.abs(x2 - x1);
-          const dy = Math.abs(y2 - y1);
-
-          if (dy > fr.height * 0.6) {
-            /* Vertical: bottom of source -> top of target */
-            sx = x1; sy = y1;
-            ex = x2; ey = y2;
-          } else {
-            /* Horizontal: right/left side */
-            if (x2 > x1) {
-              sx = fr.left - canvasRect.left + scrollL + fr.width;
-              sy = fr.top  - canvasRect.top  + scrollT + fr.height / 2;
-              ex = tr.left - canvasRect.left + scrollL;
-              ey = tr.top  - canvasRect.top  + scrollT + tr.height / 2;
-            } else {
-              sx = fr.left - canvasRect.left + scrollL;
-              sy = fr.top  - canvasRect.top  + scrollT + fr.height / 2;
-              ex = tr.left - canvasRect.left + scrollL + tr.width;
-              ey = tr.top  - canvasRect.top  + scrollT + tr.height / 2;
-            }
-          }
-
-          /* Cubic bezier curve */
-          const midY = (sy + ey) / 2;
-          const cpOffset = Math.min(Math.abs(ey - sy) * 0.5, 60);
-          const cp1y = sy + cpOffset;
-          const cp2y = ey - cpOffset;
-
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          path.setAttribute('d', `M${sx},${sy} C${sx},${cp1y} ${ex},${cp2y} ${ex},${ey}`);
-          path.setAttribute('stroke', 'rgba(130,160,255,.4)');
-          svg.appendChild(path);
+      if (explicitConns) {
+        /* Architecture mode: use explicit connections */
+        explicitConns.forEach(c => {
+          edges.push({ from: c.from, to: c.to, action: c.action || 'no-op' });
         });
+      } else {
+        /* Diff mode: use deps with color inference */
+        items.forEach(item => {
+          (item.deps || []).forEach(dep => {
+            const srcAction = actionMap[item.address] || 'no-op';
+            const depAction = actionMap[dep] || 'no-op';
+            let edgeAction = 'no-op';
+            if (srcAction === 'create' || depAction === 'create') edgeAction = 'create';
+            else if (srcAction === 'delete' || depAction === 'delete') edgeAction = 'delete';
+            edges.push({ from: dep, to: item.address, action: edgeAction });
+          });
+        });
+      }
+
+      edges.forEach(edge => {
+        const fromEl = document.getElementById(cardId(edge.from));
+        const toEl   = document.getElementById(cardId(edge.to));
+        if (!fromEl || !toEl) return;
+
+        const fr = fromEl.getBoundingClientRect();
+        const tr = toEl.getBoundingClientRect();
+
+        /* Convert to canvas-relative coords (accounting for scroll) */
+        const x1 = fr.left - canvasRect.left + scrollL + fr.width / 2;
+        const y1 = fr.top  - canvasRect.top  + scrollT + fr.height;
+        const x2 = tr.left - canvasRect.left + scrollL + tr.width / 2;
+        const y2 = tr.top  - canvasRect.top  + scrollT;
+
+        let sx, sy, ex, ey;
+        const dy = Math.abs(y2 - y1);
+
+        if (dy > fr.height * 0.6) {
+          sx = x1; sy = y1; ex = x2; ey = y2;
+        } else {
+          if (x2 > x1) {
+            sx = fr.left - canvasRect.left + scrollL + fr.width;
+            sy = fr.top  - canvasRect.top  + scrollT + fr.height / 2;
+            ex = tr.left - canvasRect.left + scrollL;
+            ey = tr.top  - canvasRect.top  + scrollT + tr.height / 2;
+          } else {
+            sx = fr.left - canvasRect.left + scrollL;
+            sy = fr.top  - canvasRect.top  + scrollT + fr.height / 2;
+            ex = tr.left - canvasRect.left + scrollL + tr.width;
+            ey = tr.top  - canvasRect.top  + scrollT + tr.height / 2;
+          }
+        }
+
+        const cpOffset = Math.min(Math.abs(ey - sy) * 0.5, 60);
+        const cp1y = sy + cpOffset;
+        const cp2y = ey - cpOffset;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${sx},${sy} C${sx},${cp1y} ${ex},${cp2y} ${ex},${ey}`);
+        path.setAttribute('stroke', EDGE_COLORS[edge.action] || EDGE_COLORS['no-op']);
+        path.setAttribute('stroke-width', EDGE_WIDTH[edge.action] || '1.5');
+        if (edge.action === 'no-op') path.setAttribute('stroke-dasharray', '5 3');
+        svg.appendChild(path);
       });
     }
 
@@ -958,7 +1012,8 @@ def visualize_tf_diff(plan: str) -> str:
     Visualize Terraform plan changes as an interactive cloud architecture diagram.
 
     Generates an MCP App with clickable resources showing configuration details
-    and before/after comparisons. Operates entirely offline without cloud credentials.
+    and before/after comparisons. Connections are color-coded: green for new
+    dependencies, red for removed, grey for unchanged.
 
     Args:
         plan: Terraform plan JSON as a string (from `terraform show -json tfplan`)
@@ -990,6 +1045,107 @@ def visualize_tf_diff(plan: str) -> str:
     # Use ensure_ascii=True to prevent any Unicode issues in JSON
     result = json.dumps(plan_data, ensure_ascii=True)
     return result
+
+
+@mcp.tool(ui=ToolUI(resource_uri=VIEW_URI))
+def visualize_architecture(architecture: str) -> str:
+    """
+    Visualize a cloud architecture as an interactive diagram.
+
+    Use this to show the architecture of existing infrastructure or to propose
+    a new architecture for user approval. Connections can be color-coded to
+    highlight new (green) or removed (red) relationships.
+
+    Args:
+        architecture: JSON string with the architecture description:
+            {
+                "title": "My Architecture",
+                "resources": [
+                    {"address": "aws_vpc.main", "type": "aws_vpc", "name": "main-vpc"},
+                    {"address": "aws_instance.web", "type": "aws_instance", "name": "web-server"}
+                ],
+                "connections": [
+                    {"from": "aws_instance.web", "to": "aws_vpc.main", "label": "runs in"},
+                    {"from": "aws_instance.web", "to": "aws_s3_bucket.data",
+                     "label": "reads from", "action": "create"}
+                ]
+            }
+            Resource types use Terraform naming (aws_*, azurerm_*, google_*).
+            Connection action: "create" (green), "delete" (red), or omit for grey.
+
+    Returns:
+        The architecture data as JSON for the MCP App UI to render
+    """
+    try:
+        arch_data = json.loads(architecture)
+    except json.JSONDecodeError as e:
+        return json.dumps({"error": f"Invalid JSON: {e}"})
+
+    if "resources" not in arch_data:
+        return json.dumps({"error": "Missing 'resources' array."})
+
+    # Try to generate SVG server-side
+    try:
+        from cloud_diagram_mcp.visualizer_hierarchical import generate_architecture_svg
+        from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
+        svg = generate_architecture_svg(arch_data)
+        svg = embed_icons_in_svg_content(svg)
+        svg = svg.encode("utf-8", errors="ignore").decode("utf-8")
+        arch_data["_server_svg"] = svg
+    except Exception:
+        pass
+
+    # Build a compatible structure for the UI
+    arch_data["_mode"] = "architecture"
+    result = json.dumps(arch_data, ensure_ascii=True, default=str)
+    return result
+
+
+@mcp.tool()
+def export_architecture_svg(architecture: str, output_path: str = "") -> str:
+    """
+    Export a cloud architecture diagram as an SVG file.
+
+    Generates the diagram and writes it to a file so it can be embedded in
+    READMEs or documentation. The SVG is NOT returned as a string to avoid
+    wasting LLM tokens — only the file path is returned.
+
+    Args:
+        architecture: JSON string with the architecture description (same
+            format as visualize_architecture).
+        output_path: Optional file path for the SVG. If empty, a temp file
+            is created. Use a path like "docs/architecture.svg" to place
+            it in your repo.
+
+    Returns:
+        The absolute path to the generated SVG file.
+    """
+    try:
+        arch_data = json.loads(architecture)
+    except json.JSONDecodeError as e:
+        return json.dumps({"error": f"Invalid JSON: {e}"})
+
+    if "resources" not in arch_data:
+        return json.dumps({"error": "Missing 'resources' array."})
+
+    from cloud_diagram_mcp.visualizer_hierarchical import generate_architecture_svg
+    from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
+
+    svg = generate_architecture_svg(arch_data)
+    svg = embed_icons_in_svg_content(svg)
+    svg = svg.encode("utf-8", errors="ignore").decode("utf-8")
+
+    if output_path:
+        target = Path(output_path).resolve()
+        target.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        import tempfile as _tmp
+        fd, tmp = _tmp.mkstemp(suffix=".svg", prefix="architecture_")
+        os.close(fd)
+        target = Path(tmp)
+
+    target.write_text(svg, encoding="utf-8")
+    return json.dumps({"path": str(target), "size_kb": round(len(svg) / 1024, 1)})
 
 
 # ---------------------------------------------------------------------------

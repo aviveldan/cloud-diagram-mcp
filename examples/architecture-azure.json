@@ -1,0 +1,91 @@
+{
+  "title": "Web App on Azure",
+  "resources": [
+    {
+      "address": "azurerm_virtual_network.main",
+      "type": "azurerm_virtual_network",
+      "name": "main-vnet",
+      "config": {
+        "address_space": ["10.0.0.0/16"],
+        "location": "eastus"
+      }
+    },
+    {
+      "address": "azurerm_subnet.app",
+      "type": "azurerm_subnet",
+      "name": "app-subnet",
+      "config": {
+        "address_prefixes": ["10.0.1.0/24"]
+      }
+    },
+    {
+      "address": "azurerm_app_service.web",
+      "type": "azurerm_app_service",
+      "name": "web-app",
+      "config": {
+        "sku": "P1v2",
+        "runtime": "node|18-lts"
+      }
+    },
+    {
+      "address": "azurerm_mssql_server.db",
+      "type": "azurerm_mssql_server",
+      "name": "sql-server",
+      "config": {
+        "version": "12.0",
+        "administrator_login": "sqladmin"
+      }
+    },
+    {
+      "address": "azurerm_storage_account.assets",
+      "type": "azurerm_storage_account",
+      "name": "assets-storage",
+      "config": {
+        "account_tier": "Standard",
+        "account_replication_type": "LRS"
+      }
+    },
+    {
+      "address": "azurerm_user_assigned_identity.app",
+      "type": "azurerm_user_assigned_identity",
+      "name": "app-identity",
+      "config": {
+        "location": "eastus"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "from": "azurerm_subnet.app",
+      "to": "azurerm_virtual_network.main",
+      "label": "part of"
+    },
+    {
+      "from": "azurerm_app_service.web",
+      "to": "azurerm_subnet.app",
+      "label": "deployed in"
+    },
+    {
+      "from": "azurerm_app_service.web",
+      "to": "azurerm_mssql_server.db",
+      "label": "queries"
+    },
+    {
+      "from": "azurerm_app_service.web",
+      "to": "azurerm_storage_account.assets",
+      "label": "reads/writes blobs",
+      "action": "create"
+    },
+    {
+      "from": "azurerm_user_assigned_identity.app",
+      "to": "azurerm_storage_account.assets",
+      "label": "granted access",
+      "action": "create"
+    },
+    {
+      "from": "azurerm_app_service.web",
+      "to": "azurerm_user_assigned_identity.app",
+      "label": "uses identity"
+    }
+  ]
+}
