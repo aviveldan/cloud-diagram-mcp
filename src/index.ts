@@ -9,7 +9,6 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { generateMermaidDiagram, getActionCounts } from './utils/mermaid-generator.js';
-import { generateRiskSummary } from './utils/risk-summary.js';
 import { TerraformPlan } from './utils/types.js';
 
 /**
@@ -67,7 +66,7 @@ class CloudDiffServer {
         tools: [
           {
             name: 'analyze_tf_plan',
-            description: 'Analyze a Terraform plan JSON and generate a visual Mermaid diagram with risk summary',
+            description: 'Analyze a Terraform plan JSON and generate a visual Mermaid diagram',
             inputSchema: {
               type: 'object',
               properties: {
@@ -143,14 +142,11 @@ class CloudDiffServer {
     // Generate Mermaid diagram
     const mermaidDiagram = generateMermaidDiagram(plan);
     
-    // Generate risk summary
-    const riskSummary = generateRiskSummary(plan);
-    
     // Get action counts
     const actionCounts = getActionCounts(plan);
 
-    // Create the UI content with the diagram, risk summary, and action button
-    const uiContent = this.generateUIContent(mermaidDiagram, riskSummary, actionCounts);
+    // Create the UI content with the diagram and action button
+    const uiContent = this.generateUIContent(mermaidDiagram, actionCounts);
 
     return {
       content: [
@@ -164,7 +160,6 @@ class CloudDiffServer {
 
   private generateUIContent(
     mermaidDiagram: string,
-    riskSummary: string,
     actionCounts: Record<string, number>
   ): string {
     const lines: string[] = [];
@@ -184,10 +179,6 @@ class CloudDiffServer {
     lines.push('```mermaid');
     lines.push(mermaidDiagram);
     lines.push('```');
-    lines.push('');
-
-    // Risk summary
-    lines.push(riskSummary);
     lines.push('');
 
     // Action buttons (formatted as instructions)

@@ -13,11 +13,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function testMermaidGeneration() {
-  console.log('🧪 Testing Mermaid Generation and Risk Analysis\n');
+  console.log('🧪 Testing Mermaid Generation\n');
 
   // Import the utilities
   const { generateMermaidDiagram, getActionCounts } = await import('./dist/utils/mermaid-generator.js');
-  const { generateRiskSummary } = await import('./dist/utils/risk-summary.js');
 
   // Load sample plan
   const samplePlanPath = join(__dirname, 'examples', 'sample-plan.json');
@@ -41,14 +40,6 @@ async function testMermaidGeneration() {
   console.log(`  📝 Update: ${actionCounts.update}`);
   console.log(`  🗑️ Delete: ${actionCounts.delete}`);
   console.log(`  🔄 Replace: ${actionCounts.replace}`);
-  console.log();
-
-  // Test risk summary
-  const riskSummary = generateRiskSummary(plan);
-  console.log('⚠️ Risk Summary:');
-  console.log('─'.repeat(80));
-  console.log(riskSummary);
-  console.log('─'.repeat(80));
   console.log();
 
   console.log('✅ All tests completed successfully!');
