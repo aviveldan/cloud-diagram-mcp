@@ -1,3 +1,3 @@
-"""Cloud Diff MCP Server - Python/FastMCP implementation."""
+"""Cloud Diff MCP Server — Interactive Terraform plan visualization as MCP Apps."""
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
