@@ -1,0 +1,41 @@
+[project]
+name = "cloud-diff-mcp"
+version = "1.0.0"
+description = "FastMCP server for visualizing Terraform plan changes with cloud architecture diagrams"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Aviv Eldan"}
+]
+keywords = ["mcp", "terraform", "infrastructure", "visualization", "diagrams"]
+
+dependencies = [
+    "fastmcp>=0.1.0",
+    "diagrams>=0.23.0",
+    "pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+cloud-diff-mcp = "cloud_diff_mcp.server:main"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
