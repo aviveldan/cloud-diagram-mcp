@@ -1,0 +1,36 @@
+{
+  "name": "cloud-diff-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for analyzing Terraform plans and visualizing infrastructure changes with Mermaid diagrams",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "cloud-diff-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepare": "npm run build",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "mcp",
+    "terraform",
+    "infrastructure",
+    "visualization",
+    "mermaid"
+  ],
+  "author": "Aviv Eldan",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
