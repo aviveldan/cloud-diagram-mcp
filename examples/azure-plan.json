@@ -1,0 +1,130 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.6.0",
+  "resource_changes": [
+    {
+      "address": "azurerm_resource_group.main",
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "location": "eastus",
+          "name": "my-resource-group",
+          "tags": {
+            "Environment": "production"
+          }
+        }
+      }
+    },
+    {
+      "address": "azurerm_virtual_network.main",
+      "mode": "managed",
+      "type": "azurerm_virtual_network",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "address_space": ["10.0.0.0/16"],
+          "location": "eastus",
+          "name": "main-vnet",
+          "resource_group_name": "my-resource-group"
+        }
+      }
+    },
+    {
+      "address": "azurerm_subnet.internal",
+      "mode": "managed",
+      "type": "azurerm_subnet",
+      "name": "internal",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "address_prefixes": ["10.0.2.0/24"],
+          "name": "internal",
+          "resource_group_name": "my-resource-group",
+          "virtual_network_name": "main-vnet"
+        }
+      }
+    },
+    {
+      "address": "azurerm_linux_virtual_machine.web",
+      "mode": "managed",
+      "type": "azurerm_linux_virtual_machine",
+      "name": "web",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create"],
+        "before": null,
+        "after": {
+          "admin_username": "adminuser",
+          "location": "eastus",
+          "name": "web-vm",
+          "size": "Standard_B2s"
+        }
+      }
+    },
+    {
+      "address": "azurerm_mssql_server.db",
+      "mode": "managed",
+      "type": "azurerm_mssql_server",
+      "name": "db",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["update"],
+        "before": {
+          "administrator_login": "sqladmin",
+          "name": "mydb-server",
+          "version": "12.0"
+        },
+        "after": {
+          "administrator_login": "sqladmin",
+          "name": "mydb-server",
+          "version": "12.0",
+          "minimum_tls_version": "1.2"
+        }
+      }
+    },
+    {
+      "address": "azurerm_storage_account.legacy",
+      "mode": "managed",
+      "type": "azurerm_storage_account",
+      "name": "legacy",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["delete"],
+        "before": {
+          "name": "legacystorage123",
+          "account_tier": "Standard",
+          "account_replication_type": "LRS"
+        },
+        "after": null
+      }
+    },
+    {
+      "address": "azurerm_user_assigned_identity.app",
+      "mode": "managed",
+      "type": "azurerm_user_assigned_identity",
+      "name": "app",
+      "provider_name": "registry.terraform.io/hashicorp/azurerm",
+      "change": {
+        "actions": ["create", "delete"],
+        "before": {
+          "name": "app-identity-old",
+          "location": "westus"
+        },
+        "after": {
+          "name": "app-identity-new",
+          "location": "eastus"
+        }
+      }
+    }
+  ]
+}

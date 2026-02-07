@@ -4,3 +4,11 @@ dist/
 .env
 .DS_Store
 *.tsbuildinfo
+*.pyc
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+terraform-diffs/
+venv/
+env/
