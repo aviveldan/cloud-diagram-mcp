@@ -58,13 +58,17 @@ def visualize_tf_diff(plan: str) -> str:
 The visual diff diagram has been saved to: `{output_path}`
 
 The diagram shows:
-- 🟢 **Green borders**: New resources (create)
-- 🔴 **Red borders**: Deleted resources (delete)
-- 🟠 **Orange borders**: Modified resources (update)
-- 🟣 **Purple borders**: Replaced resources (create + delete)
+- 🟢 **Green clusters**: New resources (create)
+- 🔴 **Red clusters**: Deleted resources (delete)
+- 🟠 **Orange clusters**: Modified resources (update)
+- 🟣 **Purple clusters**: Replaced resources (create + delete)
 - ⚪ **Gray/Standard**: Unchanged resources (context)
 
 **Note:** This is an offline analysis. No cloud API calls were made.
+
+The diagram uses visual clustering and emoji indicators to show resource states:
+- Resources are grouped into color-coded clusters by action type
+- Emoji indicators: ✨ (create), 🗑️ (delete), 📝 (update), 🔄 (replace)
 """
         return result
         

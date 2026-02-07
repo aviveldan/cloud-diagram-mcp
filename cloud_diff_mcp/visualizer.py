@@ -84,8 +84,15 @@ ICON_MAPPING = {
 
 
 def get_icon_class(resource_type: str) -> Any:
-    """Get the appropriate Diagrams icon class for a Terraform resource type."""
-    return ICON_MAPPING.get(resource_type, EC2)  # Default to EC2 if not found
+    """Get the appropriate Diagrams icon class for a Terraform resource type.
+    
+    Args:
+        resource_type: The Terraform resource type (e.g., "aws_instance", "azurerm_virtual_machine")
+    
+    Returns:
+        The Diagrams icon class to use. Defaults to EC2 for unknown types as a generic compute icon.
+    """
+    return ICON_MAPPING.get(resource_type, EC2)  # Default to EC2 as generic compute icon
 
 
 def get_primary_action(actions: List[str]) -> str:

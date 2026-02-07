@@ -12,3 +12,4 @@ __pycache__/
 terraform-diffs/
 venv/
 env/
+examples/diagrams/
