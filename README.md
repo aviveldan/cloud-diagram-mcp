@@ -110,7 +110,10 @@ brew install graphviz
 ```
 
 **Windows:**
-Download from [graphviz.org](https://graphviz.org/download/)
+```powershell
+winget install --id Graphviz.Graphviz
+```
+After installation, ensure the Graphviz `bin` directory (e.g. `C:\Program Files\Graphviz\bin`) is on your system PATH. You may need to restart your terminal.
 
 ## Installation
 

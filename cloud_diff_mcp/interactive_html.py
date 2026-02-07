@@ -65,7 +65,7 @@ def generate_interactive_html(
         }
     
     # Read SVG content
-    with open(svg_path, 'r') as f:
+    with open(svg_path, 'r', encoding='utf-8') as f:
         svg_content = f.read()
     
     # Generate resource details JSON for JavaScript
@@ -494,7 +494,7 @@ def generate_interactive_html(
 """
     
     # Write HTML file
-    with open(output_path, 'w') as f:
+    with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     return output_path

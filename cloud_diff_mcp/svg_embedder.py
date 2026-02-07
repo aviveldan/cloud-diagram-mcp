@@ -19,7 +19,7 @@ def embed_icons_in_svg(svg_path: str) -> str:
     Returns:
         Path to the updated SVG file with embedded icons
     """
-    with open(svg_path, 'r') as f:
+    with open(svg_path, 'r', encoding='utf-8') as f:
         svg_content = f.read()
     
     # Find all xlink:href references to PNG files
@@ -55,7 +55,7 @@ def embed_icons_in_svg(svg_path: str) -> str:
         svg_content = svg_content.replace(f'xlink:href="{image_path}"', f'xlink:href="{data_uri}"')
     
     # Write the updated SVG
-    with open(svg_path, 'w') as f:
+    with open(svg_path, 'w', encoding='utf-8') as f:
         f.write(svg_content)
     
     print(f"✅ Embedded {len(encoded_cache)} unique icons as base64 data URIs")
