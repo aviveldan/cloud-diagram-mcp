@@ -1,0 +1,174 @@
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { width: 100%; height: 100%; background: transparent; }
+body {
+  width: 100%; min-height: 800px; background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+#root {
+  flex: 1; display: flex; flex-direction: column; min-height: 800px;
+}
+
+/* ---- Header ---- */
+.header {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white; padding: 10px 16px; flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid #333;
+}
+.header-logo { display: flex; align-items: center; gap: 8px; }
+.header-logo svg { width: 22px; height: 22px; }
+.header h1 { font-size: 15px; font-weight: 700; }
+.header p  { opacity: .7; font-size: 11px; margin-top: 1px; }
+.summary-inline {
+  margin-left: auto; display: flex; gap: 12px; font-size: 11px; font-weight: 600;
+}
+.summary-inline span { display: flex; align-items: center; gap: 4px; }
+
+/* ---- Main content ---- */
+.content { flex: 1; display: flex; overflow: hidden; position: relative; min-height: 0; }
+.canvas-wrap {
+  flex: 1; min-width: 0; overflow: hidden; position: relative;
+  background: #111 radial-gradient(circle at 1px 1px, rgba(255,255,255,.03) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: 280px; flex-shrink: 0; padding: 14px; overflow-y: auto;
+  background: #161616; border-left: 1px solid #2a2a2a;
+  position: relative;
+}
+.sidebar-close {
+  position: absolute; top: 8px; right: 8px; z-index: 5;
+  width: 24px; height: 24px; border: none; border-radius: 4px;
+  background: rgba(255,255,255,.06); color: #888; font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.sidebar-close:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* Small screens: sidebar overlays diagram */
+@media (max-width: 600px) {
+  .sidebar {
+    position: absolute; top: 0; right: 0; bottom: 0; z-index: 20;
+    width: 100%; max-width: 300px;
+    box-shadow: -4px 0 20px rgba(0,0,0,.5);
+  }
+  .header h1 { font-size: 13px; }
+  .header p { font-size: 10px; }
+  .header { padding: 6px 10px; gap: 8px; }
+  .summary-inline { font-size: 10px; gap: 6px; }
+  .legend { padding: 4px 10px; font-size: 9px; gap: 8px; }
+  .zoom-controls { bottom: 8px; right: 8px; }
+  .zoom-btn { width: 28px; height: 28px; font-size: 14px; }
+}
+
+/* ---- Detail card ---- */
+.detail-card {
+  background: #1e1e1e; border-radius: 8px; padding: 14px;
+  border-left: 3px solid #667eea;
+}
+.detail-card.create  { border-left-color: #4caf50; }
+.detail-card.delete  { border-left-color: #f44336; }
+.detail-card.update  { border-left-color: #ff9800; }
+.detail-card.replace { border-left-color: #9c27b0; }
+.detail-card h3 { font-size: 14px; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.detail-card h3 svg { width: 20px; height: 20px; flex-shrink: 0; }
+.detail-card .dtype { font-size: 10px; color: #666; font-family: monospace; margin-bottom: 10px; }
+.section-title { font-size: 10px; font-weight: 700; color: #888; margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .4px; }
+.prop { background: #151515; padding: 6px 10px; border-radius: 5px; margin-bottom: 4px; font-size: 11px; }
+.prop .key { font-weight: 600; color: #bbb; }
+.prop .old { color: #ef5350; text-decoration: line-through; font-size: 10px; }
+.prop .new { color: #66bb6a; font-size: 10px; }
+.prop .val { color: #90caf9; font-family: monospace; word-break: break-all; font-size: 10px; }
+
+/* ---- Action tags / dots ---- */
+.action-tag {
+  font-size: 8px; font-weight: 700; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 4px; letter-spacing: .3px; display: inline-block;
+}
+.action-tag.create  { background: #1b5e20; color: #a5d6a7; }
+.action-tag.delete  { background: #b71c1c; color: #ef9a9a; }
+.action-tag.update  { background: #e65100; color: #ffcc80; }
+.action-tag.replace { background: #4a148c; color: #ce93d8; }
+
+/* ---- Legend ---- */
+.legend {
+  display: flex; gap: 14px; padding: 6px 16px;
+  background: #111; border-top: 1px solid #2a2a2a;
+  font-size: 10px; flex-shrink: 0; color: #777;
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.ldot { width: 7px; height: 7px; border-radius: 50%; }
+.ldot.create  { background: #4caf50; }
+.ldot.delete  { background: #f44336; }
+.ldot.update  { background: #ff9800; }
+.ldot.replace { background: #9c27b0; }
+
+/* ---- SVG viewport mode ---- */
+.svg-viewport {
+  width: 100%; height: 100%; overflow: hidden;
+  cursor: grab; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+}
+.svg-viewport:active { cursor: grabbing; }
+.svg-viewport svg { display: block; transform-origin: 0 0; position: absolute; }
+.svg-viewport svg .node { cursor: pointer; }
+.svg-viewport svg .node:hover { filter: brightness(1.15); }
+.zoom-controls {
+  position: absolute; bottom: 12px; right: 12px;
+  display: flex; flex-direction: column; gap: 3px; z-index: 10;
+}
+.zoom-btn {
+  width: 32px; height: 32px; border: 1px solid #444; border-radius: 5px;
+  background: rgba(30,30,40,.9); color: #ccc; font-size: 16px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.zoom-btn:hover { background: rgba(60,60,80,.95); color: #fff; border-color: #667eea; }
+.zoom-pct { text-align: center; font-size: 9px; color: #666; }
+
+/* ---- Loading ---- */
+.waiting {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: #666; font-size: 13px; flex-direction: column; gap: 10px;
+}
+.waiting svg { width: 36px; height: 36px; opacity: .25; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:.15} 50%{opacity:.4} }
+
+/* ---- React Flow overrides ---- */
+.react-flow__node { cursor: pointer; }
+.react-flow__minimap { background: #1a1a2e !important; }
+.react-flow__controls button {
+  background: rgba(30,30,40,.9) !important;
+  color: #ccc !important;
+  border-color: #444 !important;
+}
+.react-flow__controls button:hover {
+  background: rgba(60,60,80,.95) !important;
+  color: #fff !important;
+}
+.react-flow__background { background: #111 !important; }
+
+/* ---- Resource node (React Flow custom node) ---- */
+.resource-node {
+  width: 110px; display: flex; flex-direction: column; align-items: center;
+  padding: 10px 6px 8px; border-radius: 8px; cursor: pointer;
+  transition: all .15s; border: 1.5px solid transparent;
+  background: rgba(25,25,35,.8); position: relative;
+}
+.resource-node:hover { background: rgba(50,50,65,.9); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+.resource-node.selected { border-color: #667eea; background: rgba(102,126,234,.1); }
+.resource-node .node-icon { width: 40px; height: 40px; margin-bottom: 6px; }
+.resource-node .node-icon svg { width: 100%; height: 100%; }
+.resource-node .node-name { font-size: 10px; font-weight: 600; text-align: center; line-height: 1.2; color: #ddd; word-break: break-word; }
+.resource-node .node-type { font-size: 9px; color: #666; font-family: monospace; text-align: center; margin-top: 2px; }
+.resource-node .action-dot {
+  position: absolute; top: 5px; right: 5px;
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.action-dot.create  { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+.action-dot.delete  { background: #f44336; box-shadow: 0 0 4px #f44336; }
+.action-dot.update  { background: #ff9800; box-shadow: 0 0 4px #ff9800; }
+.action-dot.replace { background: #9c27b0; box-shadow: 0 0 4px #9c27b0; }

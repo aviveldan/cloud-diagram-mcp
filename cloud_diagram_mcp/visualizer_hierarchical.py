@@ -287,7 +287,7 @@ def _place_one(item: Dict[str, Any], node_objects: Dict[str, Any]) -> None:
     """Place a single resource node in the diagram."""
     icon_class = get_icon_class(item["type"])
     label = _render_label(item["name"], item.get("action", "no-op"))
-    node_objects[item["address"]] = icon_class(label)
+    node_objects[item["address"]] = icon_class(label, nodeid=item["address"])
 
 
 def _read_svg(output_file: Path) -> str:
