@@ -17,6 +17,8 @@ A Model Context Protocol (MCP) server that visualizes cloud infrastructure and T
 
 ## Screenshots
 
+> **Note:** To generate fresh diagrams, run `python3 generate_documentation_diagrams.py`. The generated SVG files can be found in `examples/diagrams/`.
+
 ### Simple AWS Infrastructure Changes
 ![AWS Simple Example](https://github.com/user-attachments/assets/b338b884-1ce6-4c86-b160-eab7ce3f5152)
 
