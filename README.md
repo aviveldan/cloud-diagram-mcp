@@ -25,7 +25,7 @@ MCP server that visualizes Terraform plan changes as cloud architecture diagrams
 # Install Graphviz
 # Ubuntu/Debian: sudo apt-get install graphviz
 # macOS: brew install graphviz
-# Windows: winget install --id Graphviz.Graphviz
+# Windows: winget install --id Graphviz.Graphviz (add bin to PATH)
 
 # Clone and install
 git clone https://github.com/aviveldan/cloud-diagram-mcp.git
@@ -61,7 +61,12 @@ terraform plan -out=tfplan
 terraform show -json tfplan > plan.json
 ```
 
-Then use the `visualize_tf_diff` tool with the plan JSON.
+Use the MCP `visualize_tf_diff` tool with the plan JSON as input:
+```json
+{
+  "plan": "<plan-json-content>"
+}
+```
 
 ### Command Line
 
