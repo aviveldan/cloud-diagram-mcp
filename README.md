@@ -1,20 +1,19 @@
 # Cloud Diagram MCP
 
-A Model Context Protocol (MCP) server for visualizing cloud infrastructure and Terraform plan changes with high-fidelity cloud architecture diagrams using the Python Diagrams library.
+A Model Context Protocol (MCP) server that visualizes cloud infrastructure and Terraform plan changes using high-fidelity architecture diagrams with official cloud provider icons.
 
 ## Features
 
-- 🎨 **Offline Visual Diffing**: Generate beautiful cloud architecture diagrams from Terraform plan JSON
-- 🔒 **No Cloud Credentials Required**: Operates entirely offline, processing plan output locally
-- ☁️ **Multi-Cloud Support**: Icons for AWS, Azure, and GCP resources
-- 🏗️ **Hierarchical Architecture Views**: Complex infrastructures organized by architectural layers
-- 🔗 **Dependency Connections**: Visual arrows showing relationships between resources
-- 🖱️ **Interactive HTML**: Clickable resources with configuration details
-- 🎯 **Visual State Representation**:
-  - 🟢 **Green**: New resources (create)
-  - 🔴 **Red**: Deleted resources (delete)
-  - 🟠 **Orange**: Modified resources (update)
-  - 🟣 **Purple**: Replaced resources (create + delete)
+- **Offline Visual Diffing** — Generate cloud architecture diagrams from Terraform plan JSON without cloud credentials
+- **Multi-Cloud Support** — Official icons for AWS, Azure, and GCP resources
+- **Hierarchical Architecture Views** — Complex infrastructures organized by architectural layers
+- **Dependency Visualization** — Visual arrows showing relationships between resources
+- **Interactive HTML Output** — Clickable resources with detailed configuration views
+- **Color-Coded Change Tracking**:
+  - Green: New resources (create)
+  - Red: Deleted resources (delete)
+  - Orange: Modified resources (update)
+  - Purple: Replaced resources (create + delete)
 
 ## Screenshots
 
@@ -27,78 +26,49 @@ A Model Context Protocol (MCP) server for visualizing cloud infrastructure and T
 ### Complex Multi-Tier AWS Architecture with Connections
 ![Complex AWS with Connections](https://github.com/user-attachments/assets/e63ee02d-7a6f-49d3-854c-8d6b05bd88e0)
 
-**Features visible:**
-- **Dependency Arrows**: Gray dashed arrows show relationships between resources
-- **Hierarchical Layers**: Resources organized by function (Internet, Network, Compute, Data, Storage, Security)
-- **Official Cloud Icons**: AWS service icons (Route53, CloudFront, VPC, ELB, EC2, RDS, ElastiCache, S3, IAM)
-
-The complex example shows a production-grade multi-tier architecture with 15 resources organized across 7 layers: Internet (CDN, DNS), Network Infrastructure (VPC, Subnets, NAT Gateways), Load Balancing, Compute (Multi-AZ), Data Layer (RDS, ElastiCache), Storage (S3), and Security (IAM, Security Groups).
+This example demonstrates a production-grade multi-tier architecture with 15 resources organized across 7 architectural layers: Internet (CDN, DNS), Network Infrastructure (VPC, Subnets, NAT Gateways), Load Balancing, Compute (Multi-AZ), Data Layer (RDS, ElastiCache), Storage (S3), and Security (IAM, Security Groups). The diagram includes dependency arrows showing resource relationships, hierarchical layer organization, and official AWS service icons.
 
 ## Interactive HTML Visualization
 
-The tool generates an interactive HTML page where users can explore infrastructure changes by clicking on resources. **Cloud provider icons are embedded as base64 data URIs** ensuring they display correctly in any browser without external dependencies.
+The tool generates an interactive HTML page for exploring infrastructure changes. Cloud provider icons are embedded as base64 data URIs, ensuring correct display in any browser without external dependencies.
 
 ### Initial View - Interactive Dashboard
 ![Interactive HTML - Initial State](https://github.com/user-attachments/assets/6d843f8d-59fb-4346-84de-50245a393671)
 
-**Features:**
-- **Official AWS Icons**: Route53 (purple), CloudFront (purple), VPC (blue), Subnets (network icons), NAT Gateways, ELB (orange), EC2 (orange), RDS (blue database), ElastiCache (database), S3 (green), IAM (red)
-- **Dependency Arrows**: Gray lines showing resource relationships
-- **Hierarchical Layers**: Clear organization by architectural tiers
-- **Professional UI**: Gradient header, legend, clean layout
-- **Placeholder**: Prompts user to click resources
+The interactive dashboard features official AWS service icons (Route53, CloudFront, VPC, Subnets, NAT Gateways, ELB, EC2, RDS, ElastiCache, S3, IAM), dependency arrows showing resource relationships, hierarchical layer organization, and a clean UI with gradient header and legend.
 
 ### Clicking a Resource Being Created
 ![Interactive HTML - Create Action](https://github.com/user-attachments/assets/00595897-d9ee-4274-acbd-5ddd5377832d)
 
-**Clicking web_az2 (EC2 instance):**
-- **Green border card** appears in sidebar
-- **CREATING badge** with green background
-- **AWS EC2 icon** properly rendered in diagram
-- **Full configuration** displayed:
-  - AMI: `ami-0c55b159cbfafe1f0`
-  - Instance type: `t3.small`
-  - Subnet: `subnet-private-az2`
+Clicking on a resource displays detailed information in the sidebar. This example shows an EC2 instance being created with a green border card, "CREATING" badge, and full configuration details including AMI, instance type, and subnet information.
 
 ### Clicking a Resource Being Updated
 ![Interactive HTML - Update Action](https://github.com/user-attachments/assets/cf921edb-c8e6-4850-8908-3c5d6db1a3d6)
 
-**Clicking primary (RDS database):**
-- **Orange border card** appears in sidebar
-- **UPDATING badge** with orange background
-- **AWS RDS icon** properly rendered in diagram
-- **Before/After comparison**:
-  - `engine_version`: `"13.7"` → `"14.5"`
-  - `multi_az`: `false` → `true`
-- Red strikethrough for old values, green for new
+For updated resources, the sidebar displays a before/after comparison with color-coded highlighting. This RDS database example shows engine version upgrade from 13.7 to 14.5 and multi-AZ enablement, with red strikethrough for old values and green for new values.
 
 ### Clicking a Resource Being Replaced
 ![Interactive HTML - Replace Action](https://github.com/user-attachments/assets/0816edbf-6b3a-4048-86b8-3f3caaecd53d)
 
-**Clicking www (Route53 DNS record):**
-- **Purple border card** appears in sidebar
-- **REPLACING badge** with purple background
-- **AWS Route53 icon** properly rendered in diagram
-- **Change details**:
-  - `alias.name`: `old-alb.amazonaws.com` → `production-cdn.cloudfront.net`
-  - Shows DNS routing evolution from ALB to CloudFront CDN
+Replaced resources show with a purple border and "REPLACING" badge. This Route53 DNS record example demonstrates DNS routing evolution from ALB to CloudFront CDN.
 
 ### Key Interactive Features
-- ✅ **Official Cloud Provider Icons**: All AWS, Azure, GCP icons render correctly
-- ✅ **Base64 Embedded**: Icons embedded in SVG as data URIs (no external file dependencies)
-- ✅ **Click any resource** to view full configuration and changes
-- ✅ **Before/after comparison** with color-coded highlighting
-- ✅ **Professional UI** with gradient header and clean layout
-- ✅ **Works offline** - self-contained HTML file
-- ✅ **Responsive design** - works on different screen sizes
+
+- Official cloud provider icons for AWS, Azure, and GCP
+- Base64 embedded icons in SVG (no external file dependencies)
+- Click any resource to view full configuration and changes
+- Before/after comparison with color-coded highlighting
+- Professional UI with gradient header and clean layout
+- Fully offline-capable, self-contained HTML file
+- Responsive design for different screen sizes
 
 ## Prerequisites
 
-- Python 3.10+
-- Graphviz (for diagram rendering)
-- Node.js 18+ (for building the React UI)
+- Python 3.10 or higher
+- Graphviz (required for diagram rendering)
+- Node.js 18 or higher (for building the React UI)
 
-### Install Graphviz
+### Installing Graphviz
 
 **Ubuntu/Debian:**
 ```bash
@@ -114,7 +84,8 @@ brew install graphviz
 ```powershell
 winget install --id Graphviz.Graphviz
 ```
-After installation, ensure the Graphviz `bin` directory (e.g. `C:\Program Files\Graphviz\bin`) is on your system PATH. You may need to restart your terminal.
+
+> **Note:** On Windows, ensure the Graphviz `bin` directory (typically `C:\Program Files\Graphviz\bin`) is added to your system PATH. You may need to restart your terminal after installation.
 
 ## Installation
 
@@ -126,15 +97,15 @@ cd cloud-diagram-mcp
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Build the React UI (required once)
+# Build the React UI (required once, for interactive visualizations)
 cd ui && npm install && npm run build && cd ..
 ```
 
 ## Usage
 
-### As an MCP Server
+### MCP Server Integration
 
-Add to your MCP client configuration (e.g., Claude Desktop):
+Configure your MCP client (such as Claude Desktop) to use the server:
 
 ```json
 {
@@ -148,34 +119,34 @@ Add to your MCP client configuration (e.g., Claude Desktop):
 }
 ```
 
-### Command Line Testing
+### Command Line Usage
 
 ```bash
-# Run the visualization test
+# Run visualization tests
 python3 test_visualization.py
 
-# Run the MCP server test
+# Run MCP server tests
 python3 test_mcp_server.py
 
-# Generate interactive visualization with connections
+# Generate interactive visualization with dependency connections
 python3 generate_interactive.py
 ```
 
-Outputs:
-- PNG with dependency arrows and cloud icons (265KB)
-- SVG with embedded icons (self-contained)
+**Output Files:**
+- PNG with dependency arrows and official cloud icons (~265KB)
+- SVG with embedded icons (self-contained, scalable)
 - Interactive HTML page with clickable resources
 
-**Open in browser:**
+**View in Browser:**
 ```bash
 open terraform-diffs/terraform_plan_interactive.html
 ```
 
 ## Tools
 
-### `visualize_tf_diff`
+### visualize_tf_diff
 
-Visualizes Terraform plan changes using cloud architecture diagrams.
+Visualizes Terraform plan changes as cloud architecture diagrams.
 
 **Input:**
 ```json
@@ -184,7 +155,7 @@ Visualizes Terraform plan changes using cloud architecture diagrams.
 }
 ```
 
-Generate the plan JSON with:
+**Generating Terraform Plan JSON:**
 ```bash
 terraform plan -out=tfplan
 terraform show -json tfplan > plan.json
@@ -195,48 +166,49 @@ terraform show -json tfplan > plan.json
 - Summary of changes with counts by action type
 - Visual grouping by action (create/delete/update/replace)
 
-**New Features:**
-- **Dependency Connections**: Gray dashed arrows show relationships between resources (enabled by default in hierarchical view)
-- **Interactive HTML**: Click resources to view configuration and changes (`generate_interactive.py`)
-- **SVG Output**: Use `format='svg'` for scalable vector graphics with embedded metadata
+**Features:**
+- Dependency connections via gray dashed arrows (enabled by default in hierarchical view)
+- Interactive HTML with clickable resources (`generate_interactive.py`)
+- SVG output with `format='svg'` for scalable vector graphics with embedded metadata
 
 ### Interactive Features
 
 The interactive HTML visualization provides:
-- **Clickable Resources**: Click any resource icon to view details
-- **Configuration Viewer**: See before/after values for updates
-- **Change Highlighting**: Color-coded changes (green for additions, red for deletions)
-- **Resource Metadata**: Full Terraform resource type and action information
-- **Official Cloud Icons**: AWS, Azure, and GCP icons embedded as base64 data URIs
-- **Offline Capable**: Self-contained HTML file with no external dependencies
-- **Browser-Based**: No special tools required, just open in any modern browser
-- **MCP App Compatible**: Tested with Playwright MCP browser automation
+
+- Clickable resource icons for viewing detailed information
+- Configuration viewer showing before/after values for updates
+- Color-coded change highlighting (green for additions, red for deletions)
+- Complete resource metadata including Terraform resource type and action
+- Official AWS, Azure, and GCP icons embedded as base64 data URIs
+- Self-contained HTML file with no external dependencies
+- Browser-based viewing with no special tools required
+- Compatible with MCP App and Playwright browser automation
 
 ### Supported Resource Types
 
-The tool includes icon mappings for common resources across cloud providers:
+The tool includes icon mappings for common cloud resources:
 
-**AWS**: EC2, VPC, RDS, S3, ELB, Lambda, IAM, Security Groups, ElastiCache, Route53, CloudFront, NAT Gateway, and more  
-**Azure**: Virtual Machines, Virtual Networks, SQL Database, Storage Accounts, Managed Identities, and more  
-**GCP**: Compute Engine, VPC, Cloud SQL, Cloud Storage, GKE, and more
+- **AWS**: EC2, VPC, RDS, S3, ELB, Lambda, IAM, Security Groups, ElastiCache, Route53, CloudFront, NAT Gateway, and more
+- **Azure**: Virtual Machines, Virtual Networks, SQL Database, Storage Accounts, Managed Identities, and more
+- **GCP**: Compute Engine, VPC, Cloud SQL, Cloud Storage, GKE, and more
 
-Unknown resource types default to a generic compute icon.
+Unknown resource types use a generic compute icon as fallback.
 
 ## Examples
 
-The repository includes three example Terraform plans:
+The repository includes example Terraform plans demonstrating various scenarios:
 
-1. **simple-aws-plan.json**: 6 resource changes demonstrating basic AWS infrastructure
-2. **azure-plan.json**: 7 resource changes showing Azure resources
-3. **complex-aws-plan.json**: 15 resource changes in a multi-tier production architecture with:
+1. **simple-aws-plan.json** — 6 resource changes showcasing basic AWS infrastructure
+2. **azure-plan.json** — 7 resource changes demonstrating Azure resources
+3. **complex-aws-plan.json** — 15 resource changes in a multi-tier production architecture including:
    - Multi-AZ deployment across 2 availability zones
-   - Load balancing with ALB
-   - Database with multi-AZ failover
+   - Application Load Balancer (ALB)
+   - Multi-AZ database with failover capability
    - Caching layer with ElastiCache
-   - CDN with CloudFront
-   - DNS with Route53
+   - Content delivery with CloudFront CDN
+   - DNS management with Route53
 
-Generate diagrams for all examples:
+**Generate diagrams for all examples:**
 ```bash
 python3 generate_examples.py
 ```
@@ -286,8 +258,7 @@ cloud-diagram-mcp/
 
 ### Building the React UI
 
-The MCP App UI is built with React + TypeScript + Vite. The build produces a single
-self-contained HTML file at `cloud_diagram_mcp/dist/mcp-app.html`.
+The MCP App UI is built using React, TypeScript, and Vite. The build process produces a single self-contained HTML file at `cloud_diagram_mcp/dist/mcp-app.html`.
 
 ```bash
 cd ui
@@ -295,7 +266,7 @@ npm install        # Install dependencies (first time only)
 npm run build      # Build production bundle
 ```
 
-During development, use `npm run dev` for hot-reload.
+During development, use `npm run dev` for hot-reload functionality.
 
 ### Running Tests
 
@@ -311,35 +282,35 @@ python3 test_mcp_server.py
 
 ### Architecture
 
-- **FastMCP**: Python MCP server framework for tool registration
-- **React + TypeScript**: Interactive UI built with React Flow for diagram visualization
-- **Vite + singlefile plugin**: Bundles the React app into a single HTML file
-- **@modelcontextprotocol/ext-apps**: SDK for MCP App ↔ host communication
-- **@xyflow/react (React Flow)**: Node-based diagram with built-in zoom/pan/minimap
-- **Diagrams**: Python library for generating cloud architecture SVGs (Graphviz backend)
+- **FastMCP** — Python MCP server framework for tool registration
+- **React + TypeScript** — Interactive UI with React Flow for diagram visualization
+- **Vite + singlefile plugin** — Bundles the React app into a single HTML file
+- **@modelcontextprotocol/ext-apps** — SDK for MCP App to host communication
+- **@xyflow/react (React Flow)** — Node-based diagrams with zoom/pan/minimap capabilities
+- **Diagrams** — Python library for generating cloud architecture SVGs using Graphviz backend
 
 ### Icon Embedding Solution
 
-**Problem**: SVG diagrams generated by the Diagrams library reference external PNG files using `xlink:href`, which don't display in browsers when opened directly.
+**Problem:** SVG diagrams generated by the Diagrams library reference external PNG files using `xlink:href`, which don't display correctly in browsers when opened directly.
 
-**Solution**: Created `svg_embedder.py` module that:
-- Parses SVG files and finds all external image references
-- Converts PNG file paths to base64-encoded data URIs
-- Embeds 12+ unique cloud provider icons directly in the SVG
-- Makes HTML fully self-contained and portable
-- Ensures no external file dependencies or broken image links
+**Solution:** The `svg_embedder.py` module addresses this by:
+- Parsing SVG files to find all external image references
+- Converting PNG file paths to base64-encoded data URIs
+- Embedding 12+ unique cloud provider icons directly in the SVG
+- Creating fully self-contained and portable HTML files
+- Eliminating external file dependencies and broken image links
 
-**Technical Implementation:**
-1. `cloud_diagram_mcp/server.py`: FastMCP server with `visualize_tf_diff` tool
-2. `cloud_diagram_mcp/visualizer_hierarchical.py`: Hierarchical layout with dependency connections
-3. `cloud_diagram_mcp/interactive_html.py`: Interactive HTML generator
-4. `cloud_diagram_mcp/svg_embedder.py`: Icon embedding utility
+**Implementation:**
+1. `cloud_diagram_mcp/server.py` — FastMCP server with `visualize_tf_diff` tool
+2. `cloud_diagram_mcp/visualizer_hierarchical.py` — Hierarchical layout with dependency connections
+3. `cloud_diagram_mcp/interactive_html.py` — Interactive HTML generator
+4. `cloud_diagram_mcp/svg_embedder.py` — Icon embedding utility
 
 ### Security & Privacy
 
-- ✅ **Offline Operation**: No cloud API calls or network requests
-- ✅ **Stateless**: No persistent storage of Terraform plans
-- ✅ **Credential-Free**: Does not require cloud credentials
+- **Offline Operation** — No cloud API calls or network requests required
+- **Stateless Processing** — No persistent storage of Terraform plans
+- **Credential-Free** — Does not require cloud provider credentials
 
 ## Legacy TypeScript Implementation
 
