@@ -87,9 +87,18 @@ python3 generate_documentation_diagrams.py    # Generate example diagrams
 # Build UI
 cd ui && npm install && npm run build
 
-# Run tests
+# Run Python tests (requires Graphviz)
 python3 test_mcp.py
+
+# Run Playwright UI tests
+cd ui
+npm run build
+python create-test-harness.py
+python create-test-harness-architecture.py
+npm test
 ```
+
+For complete testing documentation, see [TESTING.md](TESTING.md).
 
 ## License
 
