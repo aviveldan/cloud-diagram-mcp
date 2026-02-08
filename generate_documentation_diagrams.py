@@ -51,8 +51,8 @@ async def generate_diagram(plan_file: str, output_name: str):
 async def main():
     """Generate all example diagrams."""
     examples = [
-        ("examples/sample-plan.json", "simple-aws"),
-        ("examples/azure-plan.json", "simple-azure"),
+        ("examples/sample-plan.json", "sample-aws"),
+        ("examples/azure-plan.json", "azure"),
         ("examples/complex-aws-plan.json", "complex-aws"),
     ]
     
