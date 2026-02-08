@@ -100,6 +100,10 @@ npm test
 
 For complete testing documentation, see [TESTING.md](TESTING.md).
 
+### Continuous Integration
+
+All tests run automatically on every pull request via GitHub Actions. See `.github/workflows/test.yml` for the complete CI configuration.
+
 ## License
 
 MIT

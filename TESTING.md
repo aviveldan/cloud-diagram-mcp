@@ -109,46 +109,19 @@ The Playwright tests:
 
 ## CI/CD Integration
 
-To integrate these tests into CI/CD:
+This repository includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically runs all tests on every pull request and push to main.
 
-```yaml
-# Example GitHub Actions workflow
-- name: Setup Python
-  uses: actions/setup-python@v4
-  with:
-    python-version: '3.10'
+The workflow:
+1. Sets up Python 3.10 and installs Graphviz
+2. Installs Python dependencies and runs `test_mcp.py`
+3. Sets up Node.js 18 and installs UI dependencies
+4. Builds the React UI with `npm run build`
+5. Installs Playwright browsers
+6. Generates test harnesses
+7. Runs all 31 Playwright tests
+8. Uploads test reports on failure for debugging
 
-- name: Install dependencies
-  run: |
-    pip install -r requirements.txt
-    sudo apt-get install -y graphviz
-
-- name: Run Python tests
-  run: python test_mcp.py
-
-- name: Setup Node
-  uses: actions/setup-node@v4
-  with:
-    node-version: '18'
-
-- name: Install UI dependencies
-  run: |
-    cd ui
-    npm ci
-    npx playwright install chromium --with-deps
-
-- name: Build UI
-  run: cd ui && npm run build
-
-- name: Generate test harnesses
-  run: |
-    cd ui
-    python create-test-harness.py
-    python create-test-harness-architecture.py
-
-- name: Run Playwright tests
-  run: cd ui && npm test
-```
+The workflow ensures that all tests pass before code can be merged, maintaining high code quality and preventing regressions.
 
 ## Test Data
 
