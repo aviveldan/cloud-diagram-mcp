@@ -1,1 +1,4 @@
 node_modules/
+test-harness.html
+test-harness-architecture.html
+test-results/

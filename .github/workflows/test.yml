@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Python tests
+      run: |
+        python test_mcp.py
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: ui/package-lock.json
+
+    - name: Install UI dependencies
+      run: |
+        cd ui
+        npm ci
+
+    - name: Build UI
+      run: |
+        cd ui
+        npm run build
+
+    - name: Install Playwright browsers
+      run: |
+        cd ui
+        npx playwright install chromium --with-deps
+
+    - name: Generate test harnesses
+      run: |
+        cd ui
+        python create-test-harness.py
+        python create-test-harness-architecture.py
+
+    - name: Run Playwright tests
+      run: |
+        cd ui
+        npm test
+
+    - name: Upload Playwright report
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: ui/test-results/
+        retention-days: 7
