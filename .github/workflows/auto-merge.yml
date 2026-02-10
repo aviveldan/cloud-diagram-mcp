@@ -56,6 +56,9 @@ jobs:
             pull_number: prNumber
           });
           
+          // Store PR title for later use
+          core.setOutput('pr_title', pullRequest.title);
+          
           // Check if PR is approved (only considering latest review from each reviewer)
           const { data: reviews } = await github.rest.pulls.listReviews({
             owner: context.repo.owner,
@@ -86,10 +89,11 @@ jobs:
             ref: pullRequest.head.sha
           });
           
-          const allChecksPassed = checkRuns.check_runs.length === 0 || 
+          const hasCheckRuns = checkRuns.check_runs.length > 0;
+          const allCheckRunsPassed = hasCheckRuns && 
             checkRuns.check_runs.every(run => run.status === 'completed' && run.conclusion === 'success');
           
-          console.log(`All checks passed: ${allChecksPassed} (${checkRuns.check_runs.length} checks)`);
+          console.log(`Check runs: ${checkRuns.check_runs.length}, all passed: ${allCheckRunsPassed}`);
           
           // Check commit statuses (for workflows that use statuses instead of checks)
           const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
@@ -98,11 +102,18 @@ jobs:
             ref: pullRequest.head.sha
           });
           
-          const allStatusesPassed = statuses.state === 'success' || statuses.statuses.length === 0;
+          const hasStatuses = statuses.statuses.length > 0;
+          const allStatusesPassed = statuses.state === 'success';
           
-          console.log(`All statuses passed: ${allStatusesPassed} (state: ${statuses.state}, ${statuses.statuses.length} statuses)`);
+          console.log(`Statuses: ${statuses.statuses.length}, state: ${statuses.state}, all passed: ${allStatusesPassed}`);
           
-          const shouldMerge = isApproved && !hasChangesRequested && allChecksPassed && allStatusesPassed;
+          // Require tests to pass: either check runs or statuses must exist and all must pass
+          const testsExist = hasCheckRuns || hasStatuses;
+          const allTestsPassed = (hasCheckRuns ? allCheckRunsPassed : true) && (hasStatuses ? allStatusesPassed : true);
+          
+          console.log(`Tests exist: ${testsExist}, all tests passed: ${allTestsPassed}`);
+          
+          const shouldMerge = isApproved && !hasChangesRequested && testsExist && allTestsPassed;
           
           console.log(`Should merge: ${shouldMerge}`);
           
@@ -114,6 +125,7 @@ jobs:
       with:
         script: |
           const prNumber = ${{ steps.pr.outputs.number }};
+          const prTitle = `${{ steps.check.outputs.pr_title }}`;
           
           if (!prNumber) {
             console.log('No pull request number found');
@@ -126,8 +138,8 @@ jobs:
               repo: context.repo.repo,
               pull_number: prNumber,
               merge_method: 'squash',
-              commit_title: `Auto-merge: PR #${prNumber}`,
-              commit_message: 'Automatically merged after approval and successful tests'
+              commit_title: prTitle,
+              commit_message: `Automatically merged PR #${prNumber} after approval and successful tests`
             });
             console.log(`Successfully merged PR #${prNumber}`);
           } catch (error) {
