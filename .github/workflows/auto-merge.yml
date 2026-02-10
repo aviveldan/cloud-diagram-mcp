@@ -56,9 +56,6 @@ jobs:
             pull_number: prNumber
           });
           
-          // Store PR title for later use
-          core.setOutput('pr_title', pullRequest.title);
-          
           // Check if PR is approved (only considering latest review from each reviewer)
           const { data: reviews } = await github.rest.pulls.listReviews({
             owner: context.repo.owner,
@@ -109,7 +106,7 @@ jobs:
           
           // Require tests to pass: either check runs or statuses must exist and all must pass
           const testsExist = hasCheckRuns || hasStatuses;
-          const allTestsPassed = (hasCheckRuns ? allCheckRunsPassed : true) && (hasStatuses ? allStatusesPassed : true);
+          const allTestsPassed = (!hasCheckRuns || allCheckRunsPassed) && (!hasStatuses || allStatusesPassed);
           
           console.log(`Tests exist: ${testsExist}, all tests passed: ${allTestsPassed}`);
           
@@ -125,12 +122,18 @@ jobs:
       with:
         script: |
           const prNumber = ${{ steps.pr.outputs.number }};
-          const prTitle = `${{ steps.check.outputs.pr_title }}`;
           
           if (!prNumber) {
             console.log('No pull request number found');
             return;
           }
+          
+          // Fetch PR details to get the title safely
+          const { data: pullRequest } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: prNumber
+          });
           
           try {
             await github.rest.pulls.merge({
@@ -138,10 +141,10 @@ jobs:
               repo: context.repo.repo,
               pull_number: prNumber,
               merge_method: 'squash',
-              commit_title: prTitle,
+              commit_title: pullRequest.title,
               commit_message: `Automatically merged PR #${prNumber} after approval and successful tests`
             });
-            console.log(`Successfully merged PR #${prNumber}`);
+            console.log(`Successfully merged PR #${prNumber}: ${pullRequest.title}`);
           } catch (error) {
             console.log(`Failed to merge PR #${prNumber}: ${error.message}`);
             throw error;
