@@ -56,17 +56,28 @@ jobs:
             pull_number: prNumber
           });
           
-          // Check if PR is approved
+          // Check if PR is approved (only considering latest review from each reviewer)
           const { data: reviews } = await github.rest.pulls.listReviews({
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: prNumber
           });
           
-          const approvedReviews = reviews.filter(review => review.state === 'APPROVED');
-          const isApproved = approvedReviews.length > 0;
+          // Group reviews by user and get the latest review from each
+          const latestReviewsByUser = reviews.reduce((acc, review) => {
+            const userId = review.user.id;
+            if (!acc[userId] || new Date(review.submitted_at) > new Date(acc[userId].submitted_at)) {
+              acc[userId] = review;
+            }
+            return acc;
+          }, {});
+          
+          const latestReviews = Object.values(latestReviewsByUser);
+          const isApproved = latestReviews.some(review => review.state === 'APPROVED');
+          const hasChangesRequested = latestReviews.some(review => review.state === 'CHANGES_REQUESTED');
           
           console.log(`PR #${prNumber} is approved: ${isApproved}`);
+          console.log(`PR #${prNumber} has changes requested: ${hasChangesRequested}`);
           
           // Check if all checks have passed
           const { data: checkRuns } = await github.rest.checks.listForRef({
@@ -75,10 +86,10 @@ jobs:
             ref: pullRequest.head.sha
           });
           
-          const allChecksPassed = checkRuns.check_runs.length > 0 && 
+          const allChecksPassed = checkRuns.check_runs.length === 0 || 
             checkRuns.check_runs.every(run => run.status === 'completed' && run.conclusion === 'success');
           
-          console.log(`All checks passed: ${allChecksPassed}`);
+          console.log(`All checks passed: ${allChecksPassed} (${checkRuns.check_runs.length} checks)`);
           
           // Check commit statuses (for workflows that use statuses instead of checks)
           const { data: statuses } = await github.rest.repos.getCombinedStatusForRef({
@@ -89,9 +100,9 @@ jobs:
           
           const allStatusesPassed = statuses.state === 'success' || statuses.statuses.length === 0;
           
-          console.log(`All statuses passed: ${allStatusesPassed} (state: ${statuses.state})`);
+          console.log(`All statuses passed: ${allStatusesPassed} (state: ${statuses.state}, ${statuses.statuses.length} statuses)`);
           
-          const shouldMerge = isApproved && (allChecksPassed || allStatusesPassed);
+          const shouldMerge = isApproved && !hasChangesRequested && allChecksPassed && allStatusesPassed;
           
           console.log(`Should merge: ${shouldMerge}`);
           
