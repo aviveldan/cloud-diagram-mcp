@@ -104,9 +104,9 @@ jobs:
           console.log(`Statuses: ${statuses.statuses.length}, state: ${statuses.state}, all passed: ${allStatusesPassed}`);
           
           // Require tests to pass: either check runs or statuses must exist and all must pass
-          // If a test type exists, it must pass. If it doesn't exist, we don't care about it.
+          // If check runs exist, they must pass. If statuses exist, they must pass.
           const testsExist = hasCheckRuns || hasStatuses;
-          const allTestsPassed = (hasCheckRuns ? allCheckRunsPassed : true) && (hasStatuses ? allStatusesPassed : true);
+          const allTestsPassed = (!hasCheckRuns || allCheckRunsPassed) && (!hasStatuses || allStatusesPassed);
           
           console.log(`Tests exist: ${testsExist}, all tests passed: ${allTestsPassed}`);
           
