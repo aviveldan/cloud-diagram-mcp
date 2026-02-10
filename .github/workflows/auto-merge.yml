@@ -87,8 +87,7 @@ jobs:
           });
           
           const hasCheckRuns = checkRuns.check_runs.length > 0;
-          const allCheckRunsPassed = hasCheckRuns && 
-            checkRuns.check_runs.every(run => run.status === 'completed' && run.conclusion === 'success');
+          const allCheckRunsPassed = checkRuns.check_runs.every(run => run.status === 'completed' && run.conclusion === 'success');
           
           console.log(`Check runs: ${checkRuns.check_runs.length}, all passed: ${allCheckRunsPassed}`);
           
@@ -105,8 +104,9 @@ jobs:
           console.log(`Statuses: ${statuses.statuses.length}, state: ${statuses.state}, all passed: ${allStatusesPassed}`);
           
           // Require tests to pass: either check runs or statuses must exist and all must pass
+          // If a test type exists, it must pass. If it doesn't exist, we don't care about it.
           const testsExist = hasCheckRuns || hasStatuses;
-          const allTestsPassed = (!hasCheckRuns || allCheckRunsPassed) && (!hasStatuses || allStatusesPassed);
+          const allTestsPassed = (hasCheckRuns ? allCheckRunsPassed : true) && (hasStatuses ? allStatusesPassed : true);
           
           console.log(`Tests exist: ${testsExist}, all tests passed: ${allTestsPassed}`);
           
