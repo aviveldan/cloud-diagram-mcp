@@ -87,6 +87,7 @@ jobs:
           });
           
           const hasCheckRuns = checkRuns.check_runs.length > 0;
+          // .every() returns true for empty arrays, which is correct behavior (all elements satisfy condition)
           const allCheckRunsPassed = checkRuns.check_runs.every(run => run.status === 'completed' && run.conclusion === 'success');
           
           console.log(`Check runs: ${checkRuns.check_runs.length}, all passed: ${allCheckRunsPassed}`);
