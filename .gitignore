@@ -10,3 +10,4 @@ examples/diagrams/
 .env
 .DS_Store
 cloud_diagram_mcp/dist/
+output.html
