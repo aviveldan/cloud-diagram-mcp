@@ -104,6 +104,14 @@ For complete testing documentation, see [TESTING.md](TESTING.md).
 
 All tests run automatically on every pull request via GitHub Actions. See `.github/workflows/test.yml` for the complete CI configuration.
 
+#### Automatic PR Merging
+
+Pull requests are automatically merged when:
+- The PR has been approved by a reviewer
+- All required tests have passed successfully
+
+The auto-merge workflow runs on PR approval and test completion events. See `.github/workflows/auto-merge.yml` for the complete configuration.
+
 ## License
 
 MIT
