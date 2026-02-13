@@ -166,12 +166,12 @@ Follow these steps to create a new release:
 
 1. **Update version number** in `cloud_diagram_mcp/__init__.py`:
    ```python
-   __version__ = "2.1.0"
+   __version__ = "X.Y.Z"  # e.g., "2.1.0"
    ```
 
 2. **Update pyproject.toml** version:
    ```toml
-   version = "2.1.0"
+   version = "X.Y.Z"  # e.g., "2.1.0"
    ```
 
 3. **Update CHANGELOG.md**:
@@ -182,14 +182,14 @@ Follow these steps to create a new release:
 4. **Commit changes**:
    ```bash
    git add cloud_diagram_mcp/__init__.py pyproject.toml CHANGELOG.md
-   git commit -m "Bump version to 2.1.0"
+   git commit -m "Bump version to X.Y.Z"
    git push
    ```
 
 5. **Create and push tag**:
    ```bash
-   git tag v2.1.0
-   git push origin v2.1.0
+   git tag vX.Y.Z  # e.g., v2.1.0
+   git push origin vX.Y.Z
    ```
 
 6. **Automated process**:

@@ -91,7 +91,7 @@ jobs:
         CHECK_RUNS=$(gh pr view ${{ steps.pr.outputs.number }} --json statusCheckRollup --jq '.statusCheckRollup')
         
         # Check if there are any test workflows
-        TEST_COUNT=$(echo "$CHECK_RUNS" | jq '[.[] | select(.context // .name | test("test|Test|build|Build|CI"))] | length')
+        TEST_COUNT=$(echo "$CHECK_RUNS" | jq '[.[] | select(.context // .name | test("^(test|Test|build|Build|CI)$"))] | length')
         
         if [ "$TEST_COUNT" -eq 0 ]; then
           echo "Tests workflow not found, checking for any required checks"

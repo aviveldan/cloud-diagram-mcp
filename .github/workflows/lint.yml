@@ -32,6 +32,7 @@ jobs:
 
     - name: Type check with MyPy
       run: |
+        # Note: MyPy checking is informational only until type coverage improves
         mypy cloud_diagram_mcp/ --config-file pyproject.toml || true
 
   ui-lint:
