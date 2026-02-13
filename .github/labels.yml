@@ -1,0 +1,59 @@
+- name: bug
+  description: Something isn't working
+  color: d73a4a
+
+- name: enhancement
+  description: New feature or request
+  color: a2eeef
+
+- name: documentation
+  description: Improvements or additions to documentation
+  color: 0075ca
+
+- name: dependencies
+  description: Pull requests that update a dependency file
+  color: 0366d6
+
+- name: python
+  description: Python related changes
+  color: 3572A5
+
+- name: ui
+  description: UI related changes
+  color: 1f77b4
+
+- name: github-actions
+  description: GitHub Actions workflow changes
+  color: 2088FF
+
+- name: auto-merge
+  description: Automatically merge when tests pass
+  color: 00FF00
+
+- name: good first issue
+  description: Good for newcomers
+  color: 7057ff
+
+- name: help wanted
+  description: Extra attention is needed
+  color: 008672
+
+- name: invalid
+  description: This doesn't seem right
+  color: e4e669
+
+- name: question
+  description: Further information is requested
+  color: d876e3
+
+- name: wontfix
+  description: This will not be worked on
+  color: ffffff
+
+- name: duplicate
+  description: This issue or pull request already exists
+  color: cfd3d7
+
+- name: breaking change
+  description: Changes that break backward compatibility
+  color: ee0701

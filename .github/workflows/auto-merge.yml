@@ -1,0 +1,152 @@
+name: Auto-merge
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+      - synchronize
+      - opened
+      - edited
+      - ready_for_review
+      - reopened
+      - unlocked
+  pull_request_review:
+    types:
+      - submitted
+  check_suite:
+    types:
+      - completed
+  workflow_run:
+    workflows: ["Tests"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get PR number
+      id: pr
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_review" ]; then
+          echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+          PR_NUMBER=$(gh pr list --json number,headRefName --jq ".[] | select(.headRefName==\"${{ github.event.workflow_run.head_branch }}\") | .number" | head -1)
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" == "check_suite" ]; then
+          PR_NUMBER=$(gh pr list --json number,headRefName --jq ".[] | select(.headRefName==\"${{ github.event.check_suite.head_branch }}\") | .number" | head -1)
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check if PR has auto-merge label
+      id: check_label
+      run: |
+        if [ -n "${{ steps.pr.outputs.number }}" ]; then
+          LABELS=$(gh pr view ${{ steps.pr.outputs.number }} --json labels --jq '.labels[].name')
+          if echo "$LABELS" | grep -q "auto-merge"; then
+            echo "has_label=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_label=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "has_label=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check PR approval status
+      id: check_approval
+      if: steps.check_label.outputs.has_label == 'true'
+      run: |
+        REVIEWS=$(gh pr view ${{ steps.pr.outputs.number }} --json reviews --jq '[.reviews[] | select(.state == "APPROVED")] | length')
+        CHANGES_REQUESTED=$(gh pr view ${{ steps.pr.outputs.number }} --json reviews --jq '[.reviews[] | select(.state == "CHANGES_REQUESTED")] | length')
+        
+        if [ "$REVIEWS" -gt 0 ] && [ "$CHANGES_REQUESTED" -eq 0 ]; then
+          echo "approved=true" >> $GITHUB_OUTPUT
+        else
+          echo "approved=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check test status
+      id: check_tests
+      if: steps.check_label.outputs.has_label == 'true' && steps.check_approval.outputs.approved == 'true'
+      run: |
+        CHECK_RUNS=$(gh pr view ${{ steps.pr.outputs.number }} --json statusCheckRollup --jq '.statusCheckRollup')
+        
+        # Check if there are any test workflows
+        TEST_COUNT=$(echo "$CHECK_RUNS" | jq '[.[] | select(.context // .name | test("test|Test|build|Build|CI"))] | length')
+        
+        if [ "$TEST_COUNT" -eq 0 ]; then
+          echo "Tests workflow not found, checking for any required checks"
+          TOTAL_COUNT=$(echo "$CHECK_RUNS" | jq 'length')
+          if [ "$TOTAL_COUNT" -eq 0 ]; then
+            echo "tests_exist=false" >> $GITHUB_OUTPUT
+            echo "tests_passed=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+        else
+          echo "tests_exist=true" >> $GITHUB_OUTPUT
+        fi
+        
+        # Check if all checks have passed
+        FAILED_COUNT=$(echo "$CHECK_RUNS" | jq '[.[] | select(.conclusion == "failure" or .conclusion == "cancelled")] | length')
+        PENDING_COUNT=$(echo "$CHECK_RUNS" | jq '[.[] | select(.status == "in_progress" or .status == "queued" or .status == "pending")] | length')
+        
+        if [ "$FAILED_COUNT" -eq 0 ] && [ "$PENDING_COUNT" -eq 0 ]; then
+          echo "tests_passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "tests_passed=false" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Merge PR
+      if: |
+        steps.check_label.outputs.has_label == 'true' &&
+        steps.check_approval.outputs.approved == 'true' &&
+        (steps.check_tests.outputs.tests_exist == 'false' || steps.check_tests.outputs.tests_passed == 'true')
+      run: |
+        gh pr merge ${{ steps.pr.outputs.number }} --auto --squash
+        echo "✅ Auto-merge enabled for PR #${{ steps.pr.outputs.number }}"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Comment on PR if conditions not met
+      if: |
+        steps.check_label.outputs.has_label == 'true' &&
+        (steps.check_approval.outputs.approved != 'true' || steps.check_tests.outputs.tests_passed != 'true')
+      run: |
+        MESSAGE="⏳ Auto-merge conditions not yet met:\n\n"
+        
+        if [ "${{ steps.check_approval.outputs.approved }}" != "true" ]; then
+          MESSAGE="${MESSAGE}- ❌ Needs approval (no changes requested)\n"
+        else
+          MESSAGE="${MESSAGE}- ✅ Approved\n"
+        fi
+        
+        if [ "${{ steps.check_tests.outputs.tests_exist }}" == "true" ] && [ "${{ steps.check_tests.outputs.tests_passed }}" != "true" ]; then
+          MESSAGE="${MESSAGE}- ❌ Tests need to pass\n"
+        elif [ "${{ steps.check_tests.outputs.tests_exist }}" == "true" ]; then
+          MESSAGE="${MESSAGE}- ✅ Tests passed\n"
+        fi
+        
+        gh pr comment ${{ steps.pr.outputs.number }} --body "$MESSAGE"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

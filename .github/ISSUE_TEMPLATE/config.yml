@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/aviveldan/cloud-diagram-mcp/blob/main/README.md
+    about: Check the README for usage instructions
+  - name: Testing Documentation
+    url: https://github.com/aviveldan/cloud-diagram-mcp/blob/main/TESTING.md
+    about: Check testing documentation for test instructions

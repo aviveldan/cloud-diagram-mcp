@@ -1,0 +1,16 @@
+# Code Owners for cloud-diagram-mcp
+
+# Default owners for everything in the repo
+* @aviveldan
+
+# Workflow files
+/.github/ @aviveldan
+
+# Python code
+*.py @aviveldan
+
+# UI code
+/ui/ @aviveldan
+
+# Documentation
+*.md @aviveldan

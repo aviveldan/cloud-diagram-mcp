@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include requirements.txt
+include pyproject.toml
+recursive-include cloud_diagram_mcp *.py
+recursive-include ui/dist *
+recursive-exclude ui/node_modules *
+recursive-exclude ui/src *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
