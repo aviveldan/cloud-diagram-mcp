@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from fastmcp import FastMCP
-from fastmcp.server.apps import ResourceUI, ToolUI
+from fastmcp.server.apps import AppConfig
 
 mcp = FastMCP("cloud-diagram-mcp")
 
@@ -36,8 +36,7 @@ def _load_ui_html() -> str:
     if _UI_HTML_PATH.exists():
         return _UI_HTML_PATH.read_text(encoding="utf-8")
     raise FileNotFoundError(
-        f"UI not built. Run: cd ui && npm run build\n"
-        f"Expected at: {_UI_HTML_PATH}"
+        f"UI not built. Run: cd ui && npm run build\n" f"Expected at: {_UI_HTML_PATH}"
     )
 
 
@@ -45,7 +44,8 @@ def _load_ui_html() -> str:
 # Tool — returns structured plan data; the UI resource renders it
 # ---------------------------------------------------------------------------
 
-@mcp.tool(ui=ToolUI(resource_uri=VIEW_URI))
+
+@mcp.tool(app=AppConfig(resourceUri=VIEW_URI))
 def visualize_tf_diff(plan: str) -> str:
     """
     Visualize Terraform plan changes as an interactive cloud architecture diagram.
@@ -72,6 +72,7 @@ def visualize_tf_diff(plan: str) -> str:
     try:
         from cloud_diagram_mcp.visualizer_hierarchical import generate_svg
         from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
+
         svg = generate_svg(plan_data)
         svg = embed_icons_in_svg_content(svg)
         # Remove surrogate characters that break UTF-8 JSON serialisation
@@ -86,7 +87,7 @@ def visualize_tf_diff(plan: str) -> str:
     return result
 
 
-@mcp.tool(ui=ToolUI(resource_uri=VIEW_URI))
+@mcp.tool(app=AppConfig(resourceUri=VIEW_URI))
 def visualize_architecture(architecture: str) -> str:
     """
     Visualize a cloud architecture as an interactive diagram.
@@ -127,6 +128,7 @@ def visualize_architecture(architecture: str) -> str:
     try:
         from cloud_diagram_mcp.visualizer_hierarchical import generate_architecture_svg
         from cloud_diagram_mcp.svg_embedder import embed_icons_in_svg_content
+
         svg = generate_architecture_svg(arch_data)
         svg = embed_icons_in_svg_content(svg)
         svg = svg.encode("utf-8", errors="ignore").decode("utf-8")
@@ -179,6 +181,7 @@ def export_architecture_svg(architecture: str, output_path: str = "") -> str:
         target.parent.mkdir(parents=True, exist_ok=True)
     else:
         import tempfile as _tmp
+
         fd, tmp = _tmp.mkstemp(suffix=".svg", prefix="architecture_")
         os.close(fd)
         target = Path(tmp)
@@ -191,9 +194,10 @@ def export_architecture_svg(architecture: str, output_path: str = "") -> str:
 # UI Resource — serves the interactive HTML viewer
 # ---------------------------------------------------------------------------
 
+
 @mcp.resource(
     VIEW_URI,
-    ui=ResourceUI(),
+    app=AppConfig(),
 )
 def visualization_view() -> str:
     """Interactive Terraform plan viewer — renders tool results as architecture diagrams."""

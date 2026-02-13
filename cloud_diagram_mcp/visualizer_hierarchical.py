@@ -36,7 +36,6 @@ from diagrams.gcp.database import SQL, Firestore
 from diagrams.gcp.network import VPC as GcpVPC, LoadBalancing
 from diagrams.gcp.storage import GCS
 
-
 # ---------------------------------------------------------------------------
 # Icon mapping for Terraform resource types to Diagrams classes
 # ---------------------------------------------------------------------------
@@ -99,43 +98,65 @@ ICON_MAPPING = {
 
 # Map resource types to architectural layers
 LAYER_MAPPING = {
-    "aws_route53_zone": "dns", "aws_route53_record": "dns",
+    "aws_route53_zone": "dns",
+    "aws_route53_record": "dns",
     "aws_cloudfront_distribution": "cdn",
-    "aws_vpc": "network", "aws_subnet": "network",
-    "aws_internet_gateway": "network", "aws_nat_gateway": "network",
-    "aws_lb": "load_balancer", "aws_elb": "load_balancer", "aws_alb": "load_balancer",
+    "aws_vpc": "network",
+    "aws_subnet": "network",
+    "aws_internet_gateway": "network",
+    "aws_nat_gateway": "network",
+    "aws_lb": "load_balancer",
+    "aws_elb": "load_balancer",
+    "aws_alb": "load_balancer",
     "aws_instance": "compute",
-    "aws_db_instance": "database", "aws_rds_cluster": "database",
-    "aws_elasticache_cluster": "cache", "aws_elasticache_replication_group": "cache",
-    "aws_s3_bucket": "storage", "aws_ebs_volume": "storage", "aws_efs_file_system": "storage",
-    "aws_security_group": "security", "aws_iam_role": "security", "aws_iam_policy": "security",
-    "aws_secretsmanager_secret": "security", "aws_wafv2_web_acl": "security",
+    "aws_db_instance": "database",
+    "aws_rds_cluster": "database",
+    "aws_elasticache_cluster": "cache",
+    "aws_elasticache_replication_group": "cache",
+    "aws_s3_bucket": "storage",
+    "aws_ebs_volume": "storage",
+    "aws_efs_file_system": "storage",
+    "aws_security_group": "security",
+    "aws_iam_role": "security",
+    "aws_iam_policy": "security",
+    "aws_secretsmanager_secret": "security",
+    "aws_wafv2_web_acl": "security",
     # Azure
     "azurerm_dns_zone": "dns",
-    "azurerm_virtual_network": "network", "azurerm_subnet": "network",
-    "azurerm_lb": "load_balancer", "azurerm_application_gateway": "load_balancer",
-    "azurerm_virtual_machine": "compute", "azurerm_linux_virtual_machine": "compute",
-    "azurerm_windows_virtual_machine": "compute", "azurerm_container_group": "compute",
+    "azurerm_virtual_network": "network",
+    "azurerm_subnet": "network",
+    "azurerm_lb": "load_balancer",
+    "azurerm_application_gateway": "load_balancer",
+    "azurerm_virtual_machine": "compute",
+    "azurerm_linux_virtual_machine": "compute",
+    "azurerm_windows_virtual_machine": "compute",
+    "azurerm_container_group": "compute",
     "azurerm_app_service": "compute",
-    "azurerm_mssql_server": "database", "azurerm_mssql_database": "database",
+    "azurerm_mssql_server": "database",
+    "azurerm_mssql_database": "database",
     "azurerm_cosmosdb_account": "database",
-    "azurerm_storage_account": "storage", "azurerm_storage_blob": "storage",
+    "azurerm_storage_account": "storage",
+    "azurerm_storage_blob": "storage",
     "azurerm_storage_container": "storage",
-    "azurerm_user_assigned_identity": "security", "azurerm_network_security_group": "security",
+    "azurerm_user_assigned_identity": "security",
+    "azurerm_network_security_group": "security",
     # GCP
-    "google_compute_network": "network", "google_compute_subnetwork": "network",
+    "google_compute_network": "network",
+    "google_compute_subnetwork": "network",
     "google_compute_forwarding_rule": "load_balancer",
-    "google_compute_instance": "compute", "google_container_cluster": "compute",
+    "google_compute_instance": "compute",
+    "google_container_cluster": "compute",
     "google_app_engine_application": "compute",
-    "google_sql_database_instance": "database", "google_firestore_database": "database",
+    "google_sql_database_instance": "database",
+    "google_firestore_database": "database",
     "google_storage_bucket": "storage",
 }
 
 # Edge colors for connection actions
 EDGE_COLORS = {
-    "create": "#4caf50",   # green — new connection
-    "delete": "#f44336",   # red — removed connection
-    "no-op": "gray",       # grey — unchanged
+    "create": "#4caf50",  # green — new connection
+    "delete": "#f44336",  # red — removed connection
+    "no-op": "gray",  # grey — unchanged
 }
 
 
@@ -172,8 +193,15 @@ def _make_edge(action: str = "no-op", label: Optional[str] = None) -> Edge:
 
 def _empty_layers() -> Dict[str, List[Dict[str, Any]]]:
     return {
-        "dns": [], "cdn": [], "network": [], "load_balancer": [],
-        "compute": [], "database": [], "cache": [], "storage": [], "security": [],
+        "dns": [],
+        "cdn": [],
+        "network": [],
+        "load_balancer": [],
+        "compute": [],
+        "database": [],
+        "cache": [],
+        "storage": [],
+        "security": [],
     }
 
 
@@ -204,11 +232,18 @@ def _place_nodes(
     # Layer 2: Network
     if resources_by_layer["network"]:
         with Cluster("Network Infrastructure"):
-            vpcs = [r for r in resources_by_layer["network"] if "vpc" in r["type"] or "virtual_network" in r["type"]]
+            vpcs = [
+                r
+                for r in resources_by_layer["network"]
+                if "vpc" in r["type"] or "virtual_network" in r["type"]
+            ]
             subnets = [r for r in resources_by_layer["network"] if "subnet" in r["type"]]
             gateways = [r for r in resources_by_layer["network"] if "gateway" in r["type"]]
-            others = [r for r in resources_by_layer["network"]
-                      if r not in vpcs and r not in subnets and r not in gateways]
+            others = [
+                r
+                for r in resources_by_layer["network"]
+                if r not in vpcs and r not in subnets and r not in gateways
+            ]
             for item in vpcs:
                 _place_one(item, node_objects)
             if subnets:
@@ -302,25 +337,33 @@ def _diagram_attrs(title: str):
     """Return common Diagram constructor kwargs."""
     tmp_dir = tempfile.mkdtemp()
     output_file = Path(tmp_dir) / "diagram"
-    return dict(
-        name=title,
-        filename=str(output_file),
-        show=False,
-        direction="TB",
-        graph_attr={
-            "fontsize": "14", "bgcolor": "white", "pad": "0.8",
-            "rankdir": "TB", "splines": "spline",
-            "nodesep": "0.8", "ranksep": "1.0",
-        },
-        node_attr={"width": "1.5", "height": "1.8", "fixedsize": "true", "fontsize": "11"},
-        edge_attr={"minlen": "2"},
-        outformat="svg",
-    ), output_file
+    return (
+        dict(
+            name=title,
+            filename=str(output_file),
+            show=False,
+            direction="TB",
+            graph_attr={
+                "fontsize": "14",
+                "bgcolor": "white",
+                "pad": "0.8",
+                "rankdir": "TB",
+                "splines": "spline",
+                "nodesep": "0.8",
+                "ranksep": "1.0",
+            },
+            node_attr={"width": "1.5", "height": "1.8", "fixedsize": "true", "fontsize": "11"},
+            edge_attr={"minlen": "2"},
+            outformat="svg",
+        ),
+        output_file,
+    )
 
 
 # ---------------------------------------------------------------------------
 # Public API: generate SVG from Terraform plan (diff mode)
 # ---------------------------------------------------------------------------
+
 
 def generate_svg(plan_data: Dict[str, Any]) -> str:
     """
@@ -342,12 +385,14 @@ def generate_svg(plan_data: Dict[str, Any]) -> str:
         address = resource["address"]
         layer = LAYER_MAPPING.get(resource_type, "compute")
         resource_actions[address] = action
-        resources_by_layer[layer].append({
-            "address": address,
-            "type": resource_type,
-            "name": resource["name"],
-            "action": action,
-        })
+        resources_by_layer[layer].append(
+            {
+                "address": address,
+                "type": resource_type,
+                "name": resource["name"],
+                "action": action,
+            }
+        )
 
     attrs, output_file = _diagram_attrs("Terraform Plan")
     node_objects: Dict[str, Any] = {}
@@ -386,6 +431,7 @@ def generate_svg(plan_data: Dict[str, Any]) -> str:
 # Public API: generate SVG from architecture description (no diff)
 # ---------------------------------------------------------------------------
 
+
 def generate_architecture_svg(arch_data: Dict[str, Any]) -> str:
     """
     Generate an SVG diagram from an architecture description.
@@ -408,12 +454,14 @@ def generate_architecture_svg(arch_data: Dict[str, Any]) -> str:
     for res in resources:
         rtype = res.get("type", "")
         layer = LAYER_MAPPING.get(rtype, "compute")
-        resources_by_layer[layer].append({
-            "address": res["address"],
-            "type": rtype,
-            "name": res.get("name", res["address"]),
-            "action": "no-op",
-        })
+        resources_by_layer[layer].append(
+            {
+                "address": res["address"],
+                "type": rtype,
+                "name": res.get("name", res["address"]),
+                "action": "no-op",
+            }
+        )
 
     attrs, output_file = _diagram_attrs(title)
     node_objects: Dict[str, Any] = {}
@@ -435,6 +483,7 @@ def generate_architecture_svg(arch_data: Dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 # Legacy helper kept for backward compat
 # ---------------------------------------------------------------------------
+
 
 def get_resource_label(resource: Dict[str, Any], action: str) -> str:
     """Generate a label for a resource including action indicator."""
