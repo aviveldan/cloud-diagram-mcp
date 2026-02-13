@@ -1,5 +1,9 @@
 # Cloud Diagram MCP
 
+[![Tests](https://github.com/aviveldan/cloud-diagram-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/aviveldan/cloud-diagram-mcp/actions/workflows/test.yml)
+[![CodeQL](https://github.com/aviveldan/cloud-diagram-mcp/actions/workflows/codeql.yml/badge.svg)](https://github.com/aviveldan/cloud-diagram-mcp/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 MCP server that visualizes Terraform plan changes as cloud architecture diagrams with official AWS, Azure, and GCP icons.
 
 ## Features
@@ -103,6 +107,8 @@ For complete testing documentation, see [TESTING.md](TESTING.md).
 ### Continuous Integration
 
 All tests run automatically on every pull request via GitHub Actions. See `.github/workflows/test.yml` for the complete CI configuration.
+
+For complete CI/CD documentation, including release process and workflows, see [CI_CD.md](CI_CD.md).
 
 ## CI/CD
 
