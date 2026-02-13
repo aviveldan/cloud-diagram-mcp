@@ -9,6 +9,17 @@ authors = [
     {name = "Aviv Eldan"}
 ]
 keywords = ["mcp", "mcp-apps", "terraform", "infrastructure", "visualization", "diagrams"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Systems Administration",
+]
 
 dependencies = [
     "fastmcp>=3.0.0b2",
@@ -23,12 +34,24 @@ dev = [
     "mypy>=1.0.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/aviveldan/cloud-diagram-mcp"
+Repository = "https://github.com/aviveldan/cloud-diagram-mcp"
+Issues = "https://github.com/aviveldan/cloud-diagram-mcp/issues"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
 cloud-diagram-mcp = "cloud_diagram_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cloud_diagram_mcp*"]
+
+[tool.setuptools.package-data]
+cloud_diagram_mcp = ["py.typed"]
 
 [tool.black]
 line-length = 100
