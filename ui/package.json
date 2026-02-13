@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "build:only": "vite build",
     "test": "playwright test",
-    "test:ui": "playwright test --ui"
+    "test:ui": "playwright test --ui",
+    "test:mcp": "playwright test mcp-apps.spec.ts",
+    "test:all": "playwright test"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.0.0",
@@ -17,7 +19,9 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@playwright/test": "^1.58.2",
+    "@types/node": "^20.19.33",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^4.3.4",

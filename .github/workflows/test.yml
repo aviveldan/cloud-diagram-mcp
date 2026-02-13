@@ -44,6 +44,11 @@ jobs:
         cd ui
         npm ci
 
+    - name: Build mcp-apps-testing framework
+      run: |
+        cd ui/mcp-apps-testing
+        npx tsc
+
     - name: Build UI
       run: |
         cd ui
@@ -64,6 +69,11 @@ jobs:
       run: |
         cd ui
         npm test
+
+    - name: Run MCP Apps tests
+      run: |
+        cd ui
+        npm run test:mcp
 
     - name: Upload Playwright report
       if: failure()
