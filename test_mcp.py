@@ -1,4 +1,5 @@
 """Test MCP server end-to-end using FastMCP in-memory Client."""
+
 import asyncio
 import json
 import os
