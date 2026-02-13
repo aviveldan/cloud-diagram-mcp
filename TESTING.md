@@ -1,6 +1,6 @@
 # Test Suite Documentation
 
-This repository contains comprehensive tests for all MCP server tools.
+This repository contains comprehensive tests for all MCP server tools using both traditional methods and the new mcp-apps-testing framework.
 
 ## Test Coverage
 
@@ -9,6 +9,44 @@ The cloud-diagram-mcp server provides 3 tools:
 1. **visualize_tf_diff** - Visualizes Terraform plan changes as interactive diagrams
 2. **visualize_architecture** - Visualizes cloud architecture as interactive diagrams
 3. **export_architecture_svg** - Exports architecture diagrams as SVG files
+
+### MCP Apps Testing (mcp-apps.spec.ts)
+
+Located in the `ui/` directory, this new test suite uses the [mcp-apps-testing framework](https://github.com/aviveldan/mcp-apps-testing) to validate MCP protocol interactions:
+
+- Tests MCP host initialization and capabilities
+- Tests tool listing with proper schema validation
+- Tests `visualize_tf_diff` with sample Terraform plans
+- Tests `visualize_architecture` with Azure architecture examples
+- Tests `export_architecture_svg` for SVG file generation
+- Tests error handling for invalid JSON inputs
+- Tests protocol logging and message flow recording
+- Uses MockMCPHost with Claude profile simulation
+
+**Requirements:**
+- Node.js 18+
+- npm
+- Playwright with Chromium browser
+- mcp-apps-testing framework (included in ui/mcp-apps-testing)
+
+**Running MCP Apps tests:**
+```bash
+cd ui
+
+# Install dependencies
+npm install
+
+# Build the mcp-apps-testing framework
+cd mcp-apps-testing
+npx tsc
+cd ..
+
+# Run MCP Apps tests
+npm run test:mcp
+
+# Run with UI mode for debugging
+npx playwright test mcp-apps.spec.ts --ui
+```
 
 ### Python Tests (test_mcp.py)
 
@@ -92,6 +130,22 @@ npm run test:ui
 
 ## Test Architecture
 
+### MCP Apps Testing
+The MCP Apps tests use the mcp-apps-testing framework to:
+1. Create a MockMCPHost simulating an IDE environment (Claude, VS Code, etc.)
+2. Mock MCP protocol JSON-RPC messages and responses
+3. Test tool calls with proper parameter validation
+4. Verify protocol message flows and capabilities
+5. Test error handling and edge cases
+
+Key features:
+- **Zero-config setup**: MockMCPHost handles protocol details automatically
+- **Fluent DSL**: Human-readable methods like `callTool()`, `listTools()`
+- **Auto-retry**: Configurable retry logic with timeout support
+- **Host profiles**: Pre-configured profiles for Claude, VS Code
+- **Protocol logging**: Detailed JSON-RPC message logging for debugging
+- **Message recording**: Assert on complete message flows
+
 ### Python Tests
 The Python tests use FastMCP's in-memory Client to:
 1. Load sample JSON data from the `examples/` directory
@@ -115,11 +169,13 @@ The workflow:
 1. Sets up Python 3.10 and installs Graphviz
 2. Installs Python dependencies and runs `test_mcp.py`
 3. Sets up Node.js 18 and installs UI dependencies
-4. Builds the React UI with `npm run build`
-5. Installs Playwright browsers
-6. Generates test harnesses
-7. Runs all 31 Playwright tests
-8. Uploads test reports on failure for debugging
+4. Builds the mcp-apps-testing framework
+5. Builds the React UI with `npm run build`
+6. Installs Playwright browsers
+7. Generates test harnesses for UI tests
+8. Runs all 31 Playwright UI tests
+9. Runs 10 MCP Apps protocol tests
+10. Uploads test reports on failure for debugging
 
 The workflow ensures that all tests pass before code can be merged, maintaining high code quality and preventing regressions.
 
@@ -134,9 +190,11 @@ Example files in `examples/`:
 ## Coverage Summary
 
 - ✅ **100% tool coverage** - All 3 MCP tools have tests
+- ✅ **10 MCP protocol tests** - Comprehensive protocol interaction validation using mcp-apps-testing
 - ✅ **31 UI tests** - Comprehensive Playwright tests for interactive behavior
 - ✅ **Multiple scenarios** - Tests cover simple and complex plans, different cloud providers
 - ✅ **Integration tests** - Python tests validate end-to-end tool functionality
+- ✅ **Protocol tests** - MCP Apps tests validate JSON-RPC message flows and tool schemas
 - ✅ **UI interaction tests** - Playwright tests validate user interactions and visual behavior
 
 ## Note on export_architecture_svg
