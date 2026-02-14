@@ -71,27 +71,6 @@ The repository uses GitHub Actions for CI/CD automation. All workflows are locat
 - Tag must match pattern `v*` (e.g., `v2.1.0`)
 - PyPI trusted publishing must be configured
 
-### 5. Auto-merge (`auto-merge.yml`)
-
-**Trigger:**
-- PR labeled/unlabeled
-- PR synchronized/opened/edited
-- PR review submitted
-- Check suite completed
-- Tests workflow completed
-
-**Purpose:** Automatically merges PRs when conditions are met
-
-**Conditions:**
-- PR must have the `auto-merge` label
-- At least one approval from latest reviews
-- No "changes requested" reviews
-- All tests must pass (if tests exist)
-
-**Behavior:**
-- Enables auto-merge with squash merge strategy
-- Comments on PR if conditions are not met
-
 ## Dependabot
 
 **Configuration:** `.github/dependabot.yml`
@@ -143,7 +122,7 @@ Located in `.github/pull_request_template.md`
 **Categories:**
 - Type: `bug`, `enhancement`, `documentation`
 - Technology: `python`, `ui`, `github-actions`
-- Workflow: `auto-merge`, `dependencies`
+- Workflow: `dependencies`
 - Status: `good first issue`, `help wanted`, `wontfix`
 - Impact: `breaking change`
 
@@ -225,14 +204,12 @@ The release workflow uses PyPI Trusted Publishing (no API tokens needed).
 5. Create a Pull Request
 6. Wait for tests to pass
 7. Request review
-8. (Optional) Add `auto-merge` label if you're a maintainer
 
 ### For Maintainers
 
 1. Review PR
 2. Approve if changes are good
-3. Add `auto-merge` label if desired
-4. PR will automatically merge when tests pass
+3. Merge when tests pass and changes are approved
 
 ## Best Practices
 
@@ -258,13 +235,6 @@ The release workflow uses PyPI Trusted Publishing (no API tokens needed).
 - Check PyPI trusted publishing is configured
 - Ensure UI builds successfully
 - Check GitHub Actions logs
-
-### Auto-merge Not Working
-
-- Verify PR has `auto-merge` label
-- Check that PR has approval
-- Ensure no "changes requested" reviews exist
-- Confirm all tests passed
 
 ## Security
 
