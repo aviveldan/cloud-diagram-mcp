@@ -44,11 +44,6 @@ jobs:
         cd ui
         npm ci
 
-    - name: Build mcp-apps-testing framework
-      run: |
-        cd ui/mcp-apps-testing
-        npx tsc
-
     - name: Build UI
       run: |
         cd ui
