@@ -116,7 +116,6 @@ This repository includes comprehensive CI/CD workflows:
 
 - **Tests** (`.github/workflows/test.yml`): Runs Python and Playwright tests on all PRs and pushes to main
 - **Release** (`.github/workflows/release.yml`): Automatically publishes to PyPI when a new version tag is pushed
-- **Auto-merge** (`.github/workflows/auto-merge.yml`): Automatically merges PRs labeled with `auto-merge` when tests pass and approvals are met
 - **Dependabot** (`.github/dependabot.yml`): Automatically updates dependencies weekly
 
 ### Creating a Release
@@ -133,16 +132,6 @@ This repository includes comprehensive CI/CD workflows:
    - Build the package
    - Create a GitHub release with release notes
    - Publish to PyPI
-
-### Auto-merge
-
-To enable auto-merge on a PR:
-1. Add the `auto-merge` label to the PR
-2. Ensure the PR has at least one approval
-3. Ensure no changes are requested
-4. Ensure all tests pass
-
-The PR will be automatically merged when all conditions are met.
 
 ## Contributing
 

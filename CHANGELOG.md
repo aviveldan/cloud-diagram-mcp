@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- Auto-merge workflow removed as it was redundant
+
 ### Added
-- CI/CD workflows for automated testing, releases, and auto-merge
+- CI/CD workflows for automated testing and releases
 - GitHub Actions workflow for automated PyPI publishing
-- Auto-merge workflow for automatic PR merging when tests pass
 - Dependabot configuration for automated dependency updates
 - This CHANGELOG file
 

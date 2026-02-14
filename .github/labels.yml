@@ -26,10 +26,6 @@
   description: GitHub Actions workflow changes
   color: 2088FF
 
-- name: auto-merge
-  description: Automatically merge when tests pass
-  color: 00FF00
-
 - name: good first issue
   description: Good for newcomers
   color: 7057ff
