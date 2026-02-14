@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { MockMCPHost } from './mcp-apps-testing/dist';
+import { MockMCPHost } from 'mcp-apps-testing';
 import * as path from 'path';
 import * as fs from 'fs';
 import { fileURLToPath } from 'url';
