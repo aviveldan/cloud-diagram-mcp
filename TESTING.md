@@ -27,19 +27,14 @@ Located in the `ui/` directory, this new test suite uses the [mcp-apps-testing f
 - Node.js 18+
 - npm
 - Playwright with Chromium browser
-- mcp-apps-testing framework (included in ui/mcp-apps-testing)
+- mcp-apps-testing framework (installed via npm)
 
 **Running MCP Apps tests:**
 ```bash
 cd ui
 
-# Install dependencies
+# Install dependencies (includes mcp-apps-testing)
 npm install
-
-# Build the mcp-apps-testing framework
-cd mcp-apps-testing
-npx tsc
-cd ..
 
 # Run MCP Apps tests
 npm run test:mcp
@@ -168,14 +163,13 @@ This repository includes a GitHub Actions workflow (`.github/workflows/test.yml`
 The workflow:
 1. Sets up Python 3.10 and installs Graphviz
 2. Installs Python dependencies and runs `test_mcp.py`
-3. Sets up Node.js 18 and installs UI dependencies
-4. Builds the mcp-apps-testing framework
-5. Builds the React UI with `npm run build`
-6. Installs Playwright browsers
-7. Generates test harnesses for UI tests
-8. Runs all 31 Playwright UI tests
-9. Runs 10 MCP Apps protocol tests
-10. Uploads test reports on failure for debugging
+3. Sets up Node.js 18 and installs UI dependencies (including mcp-apps-testing)
+4. Builds the React UI with `npm run build`
+5. Installs Playwright browsers
+6. Generates test harnesses for UI tests
+7. Runs all 31 Playwright UI tests
+8. Runs 10 MCP Apps protocol tests
+9. Uploads test reports on failure for debugging
 
 The workflow ensures that all tests pass before code can be merged, maintaining high code quality and preventing regressions.
 
