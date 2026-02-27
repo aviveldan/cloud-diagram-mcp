@@ -19,7 +19,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@playwright/test": "^1.58.2",
     "@types/node": "^20.19.33",
     "@types/react": "^19.2.14",
