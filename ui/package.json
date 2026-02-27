@@ -21,7 +21,7 @@
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^20.19.33",
+    "@types/node": "^25.3.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.4",
